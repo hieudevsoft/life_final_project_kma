@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "899698375945",
+    "project_id": "fb-auth-flutter-bloc",
+    "storage_bucket": "fb-auth-flutter-bloc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:899698375945:android:6995941485dd94d4a527d8",
+        "android_client_info": {
+          "package_name": "com.hieubui.life"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "899698375945-jh9rqmkksfvr9oauosuoipfiod13nf00.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCl_rtnWLCKMEggoK6hIxEiynDqh4Sg_n4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "899698375945-3htquio915gt556frvsnsssmr45vucob.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "899698375945-n13drngtu0eus9qugu6b9nnggtj5na51.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.hieuitdevs.blocStateManagemant"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

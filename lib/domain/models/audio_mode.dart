@@ -1,0 +1,1 @@
+enum AudioMode { ON, OFF }

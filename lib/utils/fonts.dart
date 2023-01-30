@@ -1,0 +1,1 @@
+const fontQuickSand = 'Quicksand';
