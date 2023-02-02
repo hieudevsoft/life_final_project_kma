@@ -1,7 +1,7 @@
 {
     "login": "Đăng nhập",
-    "google_sigin_in": "Đăng nhập bằng Google",
-    "phone_sigin_in": "Đăng nhập bằng số điện thoại",
+    "google_sigin_in": "Đăng nhập với Google",
+    "phone_sigin_in": "Đăng nhập với số điện thoại",
     "phone_verify": "Xác minh số điện thoại",
     "phone_number": "Số điện thoại",
     "verification_code": "Mã xác nhận OTP",
@@ -43,5 +43,7 @@
     "account_type": "Kiểu tài khoản",
     "update": "Cập nhật",
     "updated": "Đã cập nhật",
-    "unknown": "Không xác định"
+    "unknown": "Không xác định",
+    "login_with_biometrics": "Đăng nhập với sinh trắc học",
+    "guest_account": "Tài khoản khách"
 }

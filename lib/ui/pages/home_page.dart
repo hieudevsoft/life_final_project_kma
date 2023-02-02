@@ -46,6 +46,7 @@ class _HomePageState extends State<HomePage> {
         ),
         centerTitle: true,
         backgroundColor: context.colorScheme.tertiary,
+        foregroundColor: context.colorScheme.onTertiary,
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(vertical: 12),

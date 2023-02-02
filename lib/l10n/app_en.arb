@@ -43,5 +43,7 @@
     "account_type": "Account type",
     "update": "Update",
     "updated": "Updated",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "login_with_biometrics": "Login with biometrics",
+    "guest_account": "Guest account"
 }

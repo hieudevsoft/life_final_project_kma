@@ -57,7 +57,9 @@ class MeetingScreen extends StatelessWidget {
               ),
             ),
             HomeMeetingButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(context, '/schedule_calendar');
+              },
               icon: Icons.calendar_month_rounded,
               iconColor: context.colorScheme.onPrimary,
               color: context.colorScheme.primary,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:toasta/toasta.dart';
 import 'package:uvid/common/constants.dart';
 import 'package:uvid/common/extensions.dart';
 import 'package:uvid/domain/models/language_type.dart';
@@ -14,6 +13,7 @@ import 'package:uvid/ui/widgets/popup_menu.dart';
 import 'package:uvid/utils/home_manager.dart';
 import 'package:uvid/utils/theme.dart';
 import 'package:provider/provider.dart';
+import 'package:uvid/utils/utils.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -126,75 +126,20 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       final isSignInWithGoogleSucessfully = await authProviders.signInWithGoogleSuccessfully();
                       if (isSignInWithGoogleSucessfully) {
                         context.read<HomeManager>().onPageChanged(0);
-                        Toasta(context).toast(
-                          Toast(
-                            darkMode: false,
-                            height: 60,
-                            borderRadius: BorderRadius.circular(12),
-                            duration: Duration(seconds: 2),
-                            subtitle: AppLocalizations.of(context)!.welcome,
-                            fadeInSubtitle: true,
-                            status: ToastStatus.success,
-                          ),
-                        );
+                        Utils().showToast(AppLocalizations.of(context)!.welcome, backgroundColor: Colors.green.shade200);
+                        Navigator.pushReplacementNamed(context, '/home');
                       } else {
-                        Toasta(context).toast(
-                          Toast(
-                            darkMode: false,
-                            height: 60,
-                            borderRadius: BorderRadius.circular(12),
-                            duration: Duration(seconds: 2),
-                            title: APP_NAME,
-                            subtitle: 'Failure',
-                            onExit: () {
-                              setState(() {
-                                _isSignInAvailable = true;
-                              });
-                            },
-                            fadeInSubtitle: true,
-                            status: ToastStatus.failed,
-                          ),
-                        );
+                        Utils().showToast("Failure!!", backgroundColor: Colors.redAccent.shade200);
                       }
                     } on GoogleSignInException catch (e) {
-                      Toasta(context).toast(
-                        Toast(
-                          darkMode: false,
-                          height: 60,
-                          borderRadius: BorderRadius.circular(12),
-                          duration: Duration(seconds: 2),
-                          title: APP_NAME,
-                          subtitle: e.toString(),
-                          onExit: () {
-                            setState(() {
-                              _isSignInAvailable = true;
-                            });
-                          },
-                          fadeInSubtitle: true,
-                          status: ToastStatus.failed,
-                        ),
-                      );
+                      Utils().showToast(e.msg, backgroundColor: Colors.redAccent.shade200);
                     } on CancelSignInException catch (_) {
                       setState(() {
                         _isSignInAvailable = true;
                       });
                     } on Exception {
-                      Toasta(context).toast(
-                        Toast(
-                          darkMode: false,
-                          height: 60,
-                          borderRadius: BorderRadius.circular(12),
-                          duration: Duration(seconds: 2),
-                          subtitle: AppLocalizations.of(context)!.some_thing_went_wrong,
-                          onExit: () {
-                            setState(() {
-                              _isSignInAvailable = true;
-                            });
-                          },
-                          fadeInSubtitle: true,
-                          status: ToastStatus.failed,
-                        ),
-                      );
+                      Utils().showToast(AppLocalizations.of(context)!.some_thing_went_wrong,
+                          backgroundColor: Colors.redAccent.shade200);
                     }
                   },
                   child: Row(
@@ -268,7 +213,17 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   backgroundColor: context.colorScheme.secondary,
                   isEnabled: _isSignInAvailable,
                   onPressed: () {
-                    //TODO login with biometrics
+                    authProviders.signInWithLocalAuth(
+                      onSuccessLocalAuth: () {
+                        Navigator.pushReplacementNamed(context, '/home');
+                      },
+                      onHardwareNotSupportBiometrics: () {
+                        Utils().showToast('Hardware not supported biometrics');
+                      },
+                      onDeviceSupportBiometrics: () {
+                        Utils().showToast('Deviced not supported biometrics');
+                      },
+                    );
                   },
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
@@ -285,7 +240,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       Expanded(
                         flex: 1,
                         child: Text(
-                          "Login with Biometrics",
+                          AppLocalizations.of(context)!.login_with_biometrics,
                           style: context.textTheme.bodyText1?.copyWith(
                             color: context.colorScheme.onSecondary,
                             fontWeight: FontWeight.bold,

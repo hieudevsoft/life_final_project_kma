@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:dartx/dartx.dart';
 import 'package:provider/provider.dart';
-import 'package:toasta/toasta.dart';
 import 'package:uvid/common/extensions.dart';
 import 'package:uvid/domain/models/audio_mode.dart';
 import 'package:uvid/domain/models/language_type.dart';
@@ -18,6 +17,7 @@ import 'package:uvid/ui/widgets/text_button.dart';
 import 'package:uvid/utils/home_manager.dart';
 import 'package:uvid/utils/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:uvid/utils/utils.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -34,42 +34,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _signOut(BuildContext context) async {
     try {
       AuthProviders().signOut();
-      Toasta(context).toast(
-        Toast(
-          darkMode: false,
-          height: 60,
-          borderRadius: BorderRadius.circular(12),
-          duration: Duration(seconds: 2),
-          subtitle: AppLocalizations.of(context)!.sign_out_successfully,
-          fadeInSubtitle: true,
-          status: ToastStatus.success,
-        ),
-      );
-      // Future.delayed(
-      //   Duration(seconds: 1),
-      //   () {
-      //     Navigator.pushNamedAndRemoveUntil(context, '/login', (route) {
-      //       return true;
-      //     });
-      //   },
-      // );
-    } on SignOutException catch (e) {
-      Toasta(context).toast(
-        Toast(
-          darkMode: false,
-          height: 60,
-          borderRadius: BorderRadius.circular(12),
-          duration: Duration(seconds: 2),
-          subtitle: e.msg,
-          onExit: () {
-            setState(() {
-              _isSignOutAvailable = true;
-            });
+      Utils().showToast(AppLocalizations.of(context)!.sign_out_successfully, backgroundColor: Colors.greenAccent.shade200);
+      if (profile == null) {
+        Future.delayed(
+          Duration(milliseconds: 300),
+          () {
+            Navigator.popAndPushNamed(context, '/login');
           },
-          fadeInSubtitle: true,
-          status: ToastStatus.failed,
-        ),
-      );
+        );
+      }
+    } on SignOutException catch (e) {
+      Utils().showToast(e.toString(), backgroundColor: Colors.redAccent.shade200);
     }
   }
 
@@ -177,7 +152,39 @@ Widget _buildHeaderProfile(
 ) {
   final profile = context.select<HomeManager, Profile?>((homeManager) => homeManager.profile);
   if (profile == null) {
-    return CircularProgressIndicator();
+    return Column(
+      children: [
+        Card(
+          shape: CircleBorder(),
+          elevation: 12,
+          shadowColor: Colors.black87,
+          borderOnForeground: true,
+          surfaceTintColor: Colors.redAccent,
+          child: CircleAvatar(
+            radius: 38,
+            backgroundColor: Colors.transparent,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(100),
+              child: Image.asset(
+                'assets/ic_launcher.png',
+                fit: BoxFit.contain,
+                width: 76,
+                height: 76,
+              ),
+            ),
+          ),
+        ),
+        Text(
+          AppLocalizations.of(context)!.guest_account,
+          style: context.textTheme.subtitle1?.copyWith(
+            fontSize: 18,
+            color: context.colorScheme.onSecondary,
+            fontWeight: FontWeight.w900,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
   } else {
     return _buildProfile(context, profile, onClickShowMore, isShowMore);
   }

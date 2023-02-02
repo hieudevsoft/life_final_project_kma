@@ -2,7 +2,11 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:local_auth_android/local_auth_android.dart';
+import 'package:local_auth_ios/local_auth_ios.dart';
 import 'package:uvid/common/constants.dart';
 import 'package:uvid/data/local_storage.dart';
 import 'package:uvid/domain/models/profile.dart';
@@ -18,7 +22,8 @@ class AuthProviders {
   }
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
-  final _googleSignIn = GoogleSignIn(signInOption: SignInOption.standard);
+  final GoogleSignIn _googleSignIn = GoogleSignIn(signInOption: SignInOption.standard);
+  final LocalAuthentication _localAuthentication = LocalAuthentication();
 
   Stream<User?> get authStateChange => _firebaseAuth.authStateChanges();
 
@@ -148,6 +153,50 @@ class AuthProviders {
       completer.complete(false);
     }
     return completer.future;
+  }
+
+  void signInWithLocalAuth({
+    required Function onSuccessLocalAuth,
+    required Function onHardwareNotSupportBiometrics,
+    required Function onDeviceSupportBiometrics,
+  }) async {
+    final bool canAuthenticateWithBiometrics = await _localAuthentication.canCheckBiometrics;
+    if (!canAuthenticateWithBiometrics) {
+      onHardwareNotSupportBiometrics();
+      return;
+    }
+    final isDeviceSupported = await _localAuthentication.isDeviceSupported();
+    if (!isDeviceSupported) {
+      onDeviceSupportBiometrics();
+      return;
+    }
+    final biometricsAvailable = await _localAuthentication.getAvailableBiometrics();
+    if (biometricsAvailable.isNotEmpty) {
+      try {
+        final bool didAuthenticate = await _localAuthentication.authenticate(
+          localizedReason: 'Please authenticate to login',
+          options: const AuthenticationOptions(sensitiveTransaction: true),
+          authMessages: const <AuthMessages>[
+            AndroidAuthMessages(
+              signInTitle: 'Oops! Biometric authentication required!',
+              cancelButton: 'No thanks',
+            ),
+            IOSAuthMessages(
+              cancelButton: 'No thanks',
+            ),
+          ],
+        );
+        if (didAuthenticate) {
+          onSuccessLocalAuth();
+        }
+      } on PlatformException catch (e) {
+        print(e);
+      } on Exception catch (e) {
+        print(e);
+      }
+    } else {
+      onDeviceSupportBiometrics();
+    }
   }
 
   void signOut() async {

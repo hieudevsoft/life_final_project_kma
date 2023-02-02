@@ -60,6 +60,7 @@ class HomeManager extends ChangeNotifier {
     final isMute = audioMode == AudioMode.OFF;
     if (isMute == _isMuteAudio) return;
     _isMuteAudio = isMute;
+    LocalStorage().setAudioMode(audioMode);
     notifyListeners();
   }
 
@@ -69,6 +70,7 @@ class HomeManager extends ChangeNotifier {
     final isMute = videoMode == VideoMode.OFF;
     if (isMute == _isMuteVideo) return;
     _isMuteVideo = isMute;
+    LocalStorage().setVideoMode(videoMode);
     notifyListeners();
   }
 
@@ -78,6 +80,7 @@ class HomeManager extends ChangeNotifier {
     final isMute = notificationMode == NotificationMode.OFF;
     if (isMute == _isMuteNotification) return;
     _isMuteNotification = isMute;
+    LocalStorage().setNotificationMode(notificationMode);
     notifyListeners();
   }
 

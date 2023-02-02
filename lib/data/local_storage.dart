@@ -1,6 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:uvid/domain/models/audio_mode.dart';
 import 'package:uvid/domain/models/language_type.dart';
+import 'package:uvid/domain/models/notification_mode.dart';
 import 'package:uvid/domain/models/profile.dart';
+import 'package:uvid/domain/models/video_mode.dart';
 
 class LocalStorage {
   LocalStorage._();
@@ -30,6 +34,36 @@ class LocalStorage {
 
   void setLanguage(LanguageType languageType) async {
     await storage.write(key: 'language', value: languageType.name);
+  }
+
+  Future<AudioMode> getAudioMode() async {
+    final audioMode = await storage.read(key: 'audio_mode');
+    if (audioMode == null) return AudioMode.ON;
+    return AudioMode.values.firstWhere((element) => element.name == audioMode);
+  }
+
+  void setAudioMode(AudioMode audioMode) async {
+    await storage.write(key: 'audio_mode', value: audioMode.name);
+  }
+
+  Future<NotificationMode> getNotificationMode() async {
+    final notificationMode = await storage.read(key: 'notification_mode');
+    if (notificationMode == null) return NotificationMode.ON;
+    return NotificationMode.values.firstWhere((element) => element.name == notificationMode);
+  }
+
+  void setNotificationMode(NotificationMode notificationMode) async {
+    await storage.write(key: 'notification_mode', value: notificationMode.name);
+  }
+
+  Future<VideoMode> getVideoMode() async {
+    final videoMode = await storage.read(key: 'video_mode');
+    if (videoMode == null) return VideoMode.ON;
+    return VideoMode.values.firstWhere((element) => element.name == videoMode);
+  }
+
+  void setVideoMode(VideoMode videoMode) async {
+    await storage.write(key: 'video_mode', value: videoMode.name);
   }
 
   Future<Profile?> getProfile() async {

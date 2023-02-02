@@ -20,51 +20,52 @@ class HomeMeetingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-        onTap: onPressed,
-        child: Stack(
+    return Stack(
+      children: [
+        Column(
           children: [
-            Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        blurRadius: 10,
-                        color: Colors.black.withOpacity(0.06),
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  width: 60,
-                  height: 60,
-                  child: Icon(
-                    icon,
-                    color: iconColor,
-                    size: 30,
-                  ),
+            InkWell(
+              onTap: onPressed,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      blurRadius: 10,
+                      color: Colors.black.withOpacity(0.06),
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                gapV8,
-                if (footer != null) ...[footer!]
-              ],
-            ),
-            Visibility(
-              visible: isHasBaged,
-              child: Positioned(
-                right: 0,
-                child: Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.redAccent.shade200,
-                  ),
+                width: 60,
+                height: 60,
+                child: Icon(
+                  icon,
+                  color: iconColor,
+                  size: 30,
                 ),
               ),
-            )
+            ),
+            gapV8,
+            if (footer != null) ...[footer!]
           ],
-        ));
+        ),
+        Visibility(
+          visible: isHasBaged,
+          child: Positioned(
+            right: 0,
+            child: Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.redAccent.shade200,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
   }
 }
