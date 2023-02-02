@@ -1,6 +1,14 @@
 {
     "login": "Đăng nhập",
     "google_sigin_in": "Đăng nhập bằng Google",
+    "phone_sigin_in": "Đăng nhập bằng số điện thoại",
+    "phone_verify": "Xác minh số điện thoại",
+    "phone_number": "Số điện thoại",
+    "verification_code": "Mã xác nhận OTP",
+    "sent_verification_code": "Chúng tôi đã gửi xác minh mã đến\nSố điện thoại di động của bạn",
+    "request_otp": "Yêu cầu OTP",
+    "requested_otp": "Đã gửi yêu cầu mã OTP",
+    "did_not_received_otp": "Chưa nhận được mã OTP?",
     "start_or_join_a_metting": "Bắt đầu hoặc tạo một cuộc họp",
     "en": "Tiếng Anh",
     "vi": "Tiếng Việt",
@@ -23,5 +31,17 @@
     "settings": "Thiết lập",
     "audio": "Âm thanh",
     "on": "Mở",
-    "off": "Tắt"
+    "off": "Tắt",
+    "sign_out": "Đăng xuất",
+    "sign_out_successfully": "Đăng xuất thành công",
+    "notification": "Thông báo",
+    "update_your_number": "Cập nhật số điện thoại",
+    "account_verified": "Tài khoản đã được xác thực",
+    "account_unverified": "Tài khoản chưa được xác thực",
+    "account_creation_time": "Thời gian tạo tài khoản",
+    "last_login": "Đăng nhập lần cuối",
+    "account_type": "Kiểu tài khoản",
+    "update": "Cập nhật",
+    "updated": "Đã cập nhật",
+    "unknown": "Không xác định"
 }

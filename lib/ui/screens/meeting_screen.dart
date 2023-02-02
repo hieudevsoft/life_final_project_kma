@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:uvid/common/extensions.dart';
 import 'package:uvid/ui/widgets/gap.dart';
 import 'package:uvid/ui/widgets/home_meeting_button.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:uvid/utils/home_manager.dart';
+import 'package:uvid/utils/theme.dart';
 
 class MeetingScreen extends StatelessWidget {
   const MeetingScreen({
@@ -73,13 +76,13 @@ class MeetingScreen extends StatelessWidget {
             ),
             HomeMeetingButton(
               onPressed: () {},
-              icon: Icons.arrow_upward_rounded,
+              icon: Icons.notifications_on_rounded,
               iconColor: context.colorScheme.onPrimary,
               color: context.colorScheme.primary,
               footer: SizedBox(
                 width: 60,
                 child: Text(
-                  AppLocalizations.of(context)!.share_screen,
+                  AppLocalizations.of(context)!.notification,
                   style: context.textTheme.bodyText1?.copyWith(
                     color: context.colorScheme.onTertiary,
                     fontSize: 14,
@@ -88,6 +91,7 @@ class MeetingScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
               ),
+              isHasBaged: !context.read<HomeManager>().isMuteNotification,
             ),
           ],
         ),
@@ -110,6 +114,38 @@ class MeetingScreen extends StatelessWidget {
                   style: context.textTheme.bodyText1?.copyWith(
                     color: context.colorScheme.onTertiary,
                     fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: Column(
+              children: [
+                Icon(
+                  context.watch<HomeManager>().statusInternet.contains('Online') ? Icons.wifi_rounded : Icons.wifi_off_rounded,
+                  color: context.watch<HomeManager>().statusInternet.contains('Online')
+                      ? context.read<ThemeManager>().themeMode == ThemeMode.dark
+                          ? Colors.green.shade500
+                          : Colors.blueAccent.shade400
+                      : context.colorScheme.error,
+                  size: 24,
+                ),
+                Text(
+                  context.watch<HomeManager>().statusInternet,
+                  style: context.textTheme.bodyText1?.copyWith(
+                    color: context.watch<HomeManager>().statusInternet.contains('Online')
+                        ? context.read<ThemeManager>().themeMode == ThemeMode.dark
+                            ? Colors.green.shade500
+                            : Colors.blueAccent.shade400
+                        : context.colorScheme.error,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
                   ),
                   textAlign: TextAlign.center,

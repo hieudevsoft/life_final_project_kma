@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:uvid/domain/models/audio_mode.dart';
 import 'package:uvid/domain/models/language_type.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:uvid/domain/models/notification_mode.dart';
 import 'package:uvid/domain/models/video_mode.dart';
 
 extension ExtensionsContext on BuildContext {
@@ -32,10 +33,20 @@ extension ExtensionsContext on BuildContext {
     }
   }
 
+  String notificationModeAsString(NotificationMode notificationMode) {
+    switch (notificationMode) {
+      case NotificationMode.ON:
+        return AppLocalizations.of(this)!.on;
+      case NotificationMode.OFF:
+        return AppLocalizations.of(this)!.off;
+    }
+  }
+
   String typeAsString<T>(T type) {
     if (type is LanguageType) return languageTypeAsString(type);
     if (type is AudioMode) return audioModeAsString(type);
     if (type is VideoMode) return videoModeAsString(type);
+    if (type is NotificationMode) return notificationModeAsString(type);
     if (type is bool) return type ? AppLocalizations.of(this)!.darkmode_on : AppLocalizations.of(this)!.darkmode_off;
     return "";
   }

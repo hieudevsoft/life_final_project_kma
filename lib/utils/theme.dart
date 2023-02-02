@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uvid/data/local_storage.dart';
 import 'package:uvid/domain/models/language_type.dart';
 import 'package:uvid/utils/colors.dart';
 import 'package:uvid/utils/fonts.dart';
@@ -92,6 +93,7 @@ class ThemeManager with ChangeNotifier {
     if (isDarkmode && themeMode == ThemeMode.dark) return;
     if (!isDarkmode && themeMode == ThemeMode.light) return;
     _themeMode = themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    LocalStorage().setIsDarkMode(isDarkmode);
     notifyListeners();
   }
 
@@ -105,6 +107,7 @@ class ThemeManager with ChangeNotifier {
     } else {
       _locale = Locale('vi');
     }
+    LocalStorage().setLanguage(type);
     notifyListeners();
   }
 }

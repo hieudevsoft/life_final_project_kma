@@ -7,7 +7,7 @@ class UvidAppConnectivity {
   UvidAppConnectivity._();
   static final _instance = UvidAppConnectivity._();
   final connectivity = Connectivity();
-  final _connectivityController = StreamController.broadcast();
+  var _connectivityController = StreamController.broadcast();
   Stream get connectivityStream => _connectivityController.stream;
   bool isAvailable = false;
   factory UvidAppConnectivity() {
@@ -15,6 +15,9 @@ class UvidAppConnectivity {
   }
 
   void initialise() async {
+    if (_connectivityController.isClosed) {
+      _connectivityController = StreamController.broadcast();
+    }
     connectivity.onConnectivityChanged.listen((result) {
       _checkStatus(result);
     });
@@ -23,10 +26,10 @@ class UvidAppConnectivity {
   void _checkStatus(ConnectivityResult result) async {
     bool isOnline = false;
     try {
-      final result = await InternetAddress.lookup('google.com');
+      final result = await InternetAddress.lookup('example.com');
       isOnline = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
       isAvailable = isOnline;
-    } on SocketException catch (e) {
+    } on SocketException {
       isOnline = false;
     }
     isAvailable = isOnline;

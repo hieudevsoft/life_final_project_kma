@@ -3,7 +3,6 @@ import 'package:uvid/common/extensions.dart';
 import 'package:uvid/ui/widgets/gap.dart';
 
 Widget fullScreenLoadingWidget(BuildContext context) => Container(
-      color: context.colorScheme.secondary,
       child: Center(
         widthFactor: 1,
         heightFactor: 1,

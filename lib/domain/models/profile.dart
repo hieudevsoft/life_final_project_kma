@@ -1,6 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:equatable/equatable.dart';
 
@@ -81,8 +80,8 @@ class Profile extends Equatable {
       'name': name,
       'email': email,
       'isVerified': isVerified,
-      'createdAt': createdAt,
-      'lastSignInTime': lastSignInTime,
+      'createdAt': createdAt?.toIso8601String(),
+      'lastSignInTime': lastSignInTime?.toIso8601String(),
       'phoneNumber': phoneNumber,
       'photoUrl': photoUrl,
       'providerId': providerId,
@@ -97,8 +96,8 @@ class Profile extends Equatable {
       name: map['name'] != null ? map['name'] as String : null,
       email: map['email'] != null ? map['email'] as String : null,
       isVerified: map['isVerified'] != null ? map['isVerified'] as bool : null,
-      createdAt: map['createdAt'] != null ? map['createdAt'] as DateTime : null,
-      lastSignInTime: map['lastSignInTime'] != null ? map['lastSignInTime'] as DateTime : null,
+      createdAt: DateTime.tryParse(map['createdAt']),
+      lastSignInTime: DateTime.tryParse(map['lastSignInTime']),
       phoneNumber: map['phoneNumber'] != null ? map['phoneNumber'] as String : null,
       photoUrl: map['photoUrl'] != null ? map['photoUrl'] as String : null,
       providerId: map['providerId'] != null ? map['providerId'] as String : null,

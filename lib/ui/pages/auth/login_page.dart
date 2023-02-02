@@ -1,4 +1,3 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -12,7 +11,7 @@ import 'package:uvid/providers/auth.dart';
 import 'package:uvid/ui/widgets/elevated_button.dart';
 import 'package:uvid/ui/widgets/gap.dart';
 import 'package:uvid/ui/widgets/popup_menu.dart';
-import 'package:uvid/utils/connectivity.dart';
+import 'package:uvid/utils/home_manager.dart';
 import 'package:uvid/utils/theme.dart';
 import 'package:provider/provider.dart';
 
@@ -25,42 +24,20 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   late final AnimationController _controller;
-  Map _source = {ConnectivityResult.none: false};
-  final UvidAppConnectivity _networkConnectivity = UvidAppConnectivity();
-  String string = '';
-  bool _isSignInAvailable = false;
+
+  bool _isSignInAvailable = true;
   late AuthProviders authProviders;
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this);
     authProviders = AuthProviders();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _networkConnectivity.initialise();
-      _networkConnectivity.connectivityStream.listen((source) {
-        _source = source;
-        _isSignInAvailable = true;
-        switch (_source.keys.toList()[0]) {
-          case ConnectivityResult.mobile:
-            string = _source.values.toList()[0] ? 'Mobile: Online' : 'Mobile: Offline';
-            break;
-          case ConnectivityResult.wifi:
-            string = _source.values.toList()[0] ? 'WiFi: Online' : 'WiFi: Offline';
-            break;
-          case ConnectivityResult.none:
-          default:
-            string = 'Offline';
-        }
-        ;
-        setState(() {});
-      });
-    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _networkConnectivity.disposeStream();
+
     super.dispose();
   }
 
@@ -78,7 +55,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
+                  horizontal: 48,
                   vertical: 16,
                 ),
                 child: Row(
@@ -91,6 +68,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                 ),
               ),
               Container(
+                width: MediaQuery.of(context).size.width / 1.5,
                 child: Lottie.asset(
                   'assets/images/video_conference.json',
                   controller: _controller,
@@ -114,8 +92,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
               ),
               gapV24,
               Icon(
-                string.contains('Online') ? Icons.wifi_rounded : Icons.wifi_off_rounded,
-                color: string.contains('Online')
+                context.watch<HomeManager>().statusInternet.contains('Online') ? Icons.wifi_rounded : Icons.wifi_off_rounded,
+                color: context.watch<HomeManager>().statusInternet.contains('Online')
                     ? isDarkmode
                         ? Colors.green.shade500
                         : Colors.white
@@ -124,9 +102,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
               ),
               gapV4,
               Text(
-                string,
+                context.watch<HomeManager>().statusInternet,
                 style: context.textTheme.bodyText1?.copyWith(
-                  color: string.contains('Online')
+                  color: context.watch<HomeManager>().statusInternet.contains('Online')
                       ? isDarkmode
                           ? Colors.green.shade500
                           : Colors.white
@@ -136,9 +114,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
               ),
               gapV24,
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 48),
                 child: MyElevatedButton(
-                  backgroundColor: context.colorScheme.tertiary,
+                  backgroundColor: context.colorScheme.background,
                   isEnabled: _isSignInAvailable,
                   onPressed: () async {
                     try {
@@ -147,6 +125,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       });
                       final isSignInWithGoogleSucessfully = await authProviders.signInWithGoogleSuccessfully();
                       if (isSignInWithGoogleSucessfully) {
+                        context.read<HomeManager>().onPageChanged(0);
                         Toasta(context).toast(
                           Toast(
                             darkMode: false,
@@ -154,16 +133,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                             borderRadius: BorderRadius.circular(12),
                             duration: Duration(seconds: 2),
                             subtitle: AppLocalizations.of(context)!.welcome,
-                            onAppear: () {
-                              setState(() {
-                                _isSignInAvailable = false;
-                              });
-                            },
-                            onExit: () {
-                              setState(() {
-                                _isSignInAvailable = true;
-                              });
-                            },
                             fadeInSubtitle: true,
                             status: ToastStatus.success,
                           ),
@@ -177,11 +146,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                             duration: Duration(seconds: 2),
                             title: APP_NAME,
                             subtitle: 'Failure',
-                            onAppear: () {
-                              setState(() {
-                                _isSignInAvailable = false;
-                              });
-                            },
                             onExit: () {
                               setState(() {
                                 _isSignInAvailable = true;
@@ -201,11 +165,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                           duration: Duration(seconds: 2),
                           title: APP_NAME,
                           subtitle: e.toString(),
-                          onAppear: () {
-                            setState(() {
-                              _isSignInAvailable = false;
-                            });
-                          },
                           onExit: () {
                             setState(() {
                               _isSignInAvailable = true;
@@ -219,7 +178,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       setState(() {
                         _isSignInAvailable = true;
                       });
-                    } on Exception catch (e) {
+                    } on Exception {
                       Toasta(context).toast(
                         Toast(
                           darkMode: false,
@@ -227,11 +186,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                           borderRadius: BorderRadius.circular(12),
                           duration: Duration(seconds: 2),
                           subtitle: AppLocalizations.of(context)!.some_thing_went_wrong,
-                          onAppear: () {
-                            setState(() {
-                              _isSignInAvailable = false;
-                            });
-                          },
                           onExit: () {
                             setState(() {
                               _isSignInAvailable = true;
@@ -244,7 +198,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                     }
                   },
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Image.asset(
@@ -254,11 +208,89 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                         width: 32,
                       ),
                       gapH8,
-                      Text(
-                        AppLocalizations.of(context)!.google_sigin_in,
-                        style: context.textTheme.bodyText1?.copyWith(
-                          color: context.colorScheme.onTertiary,
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(context)!.google_sigin_in,
+                          style: context.textTheme.bodyText1?.copyWith(
+                            color: context.colorScheme.onBackground,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 48,
+                ),
+                child: MyElevatedButton(
+                  backgroundColor: context.colorScheme.tertiary,
+                  isEnabled: _isSignInAvailable,
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/phone_verify");
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/ic_phone.png',
+                        fit: BoxFit.cover,
+                        filterQuality: FilterQuality.high,
+                        width: 32,
+                      ),
+                      gapH8,
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          AppLocalizations.of(context)!.phone_sigin_in,
+                          style: context.textTheme.bodyText1?.copyWith(
+                            color: context.colorScheme.onTertiary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 48,
+                ),
+                child: MyElevatedButton(
+                  backgroundColor: context.colorScheme.secondary,
+                  isEnabled: _isSignInAvailable,
+                  onPressed: () {
+                    //TODO login with biometrics
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/ic_biometrics.png',
+                        fit: BoxFit.cover,
+                        filterQuality: FilterQuality.high,
+                        width: 32,
+                      ),
+                      gapH8,
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          "Login with Biometrics",
+                          style: context.textTheme.bodyText1?.copyWith(
+                            color: context.colorScheme.onSecondary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ],

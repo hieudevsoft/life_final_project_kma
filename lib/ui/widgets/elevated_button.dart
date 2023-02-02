@@ -11,6 +11,7 @@ class MyElevatedButton extends StatelessWidget {
     this.minimumSize,
     this.isEnabled = true,
     this.onPressed,
+    this.shadowColor,
   }) : super(key: key);
 
   final OutlinedBorder? shape;
@@ -20,6 +21,7 @@ class MyElevatedButton extends StatelessWidget {
   final Size? minimumSize;
   final VoidCallback? onPressed;
   final bool isEnabled;
+  final Color? shadowColor;
 
   final Widget? child;
 
@@ -32,8 +34,9 @@ class MyElevatedButton extends StatelessWidget {
         backgroundColor: backgroundColor,
         foregroundColor: foregroundColor,
         surfaceTintColor: surfaceTintColor,
+        shadowColor: shadowColor,
         minimumSize: minimumSize ?? Size(MediaQuery.of(context).size.width.toInt() - 50, 50),
-        disabledBackgroundColor: Colors.grey.shade200.withAlpha(80),
+        disabledBackgroundColor: Colors.grey.shade300.withAlpha(80),
       ),
       child: child,
     );

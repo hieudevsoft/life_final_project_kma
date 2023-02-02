@@ -4,20 +4,28 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:uvid/common/constants.dart';
+import 'package:uvid/data/local_storage.dart';
 import 'package:uvid/domain/models/profile.dart';
 import 'package:uvid/exceptions/cancel_sign_in.dart';
 import 'package:uvid/exceptions/google_sign_in.dart';
+import 'package:uvid/exceptions/sign_out.dart';
 
 class AuthProviders {
+  AuthProviders._();
+  static get _instance => AuthProviders._();
+  factory AuthProviders() {
+    return _instance;
+  }
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
+  final _googleSignIn = GoogleSignIn(signInOption: SignInOption.standard);
 
   Stream<User?> get authStateChange => _firebaseAuth.authStateChanges();
 
   Future<bool> signInWithGoogleSuccessfully() async {
     final Completer<bool> completer = Completer();
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       final GoogleSignInAuthentication? authencation = await googleUser?.authentication;
       final credential = GoogleAuthProvider.credential(
         idToken: authencation?.idToken,
@@ -26,26 +34,28 @@ class AuthProviders {
       UserCredential? userCredential = await _firebaseAuth.signInWithCredential(credential);
       User? user = userCredential.user;
       if (user != null) {
+        final userProfile = Profile(
+          name: user.displayName,
+          email: user.email,
+          isVerified: user.emailVerified,
+          createdAt: user.metadata.creationTime,
+          lastSignInTime: user.metadata.lastSignInTime,
+          phoneNumber: user.phoneNumber,
+          photoUrl: user.photoURL,
+          providerId: user.providerData.first.providerId,
+          userId: user.providerData.first.uid,
+          uniqueId: user.uid,
+          locale: userCredential.additionalUserInfo?.profile?['locale'] ?? 'Unknown',
+        );
         if (userCredential.additionalUserInfo!.isNewUser) {
-          final userProfile = Profile(
-            name: user.displayName,
-            email: user.email,
-            isVerified: user.emailVerified,
-            createdAt: user.metadata.creationTime,
-            lastSignInTime: user.metadata.lastSignInTime,
-            phoneNumber: user.phoneNumber,
-            photoUrl: user.photoURL,
-            providerId: user.providerData.first.providerId,
-            userId: user.providerData.first.uid,
-            uniqueId: user.uid,
-            locale: userCredential.additionalUserInfo?.profile?['locale'] ?? 'Unknown',
-          );
           await _firebaseFirestore.collection(USER_COLLECTION).doc(user.uid).set(
                 userProfile.toMap(),
                 SetOptions(merge: false),
               );
-          completer.complete(true);
         }
+        LocalStorage().setProfile(userProfile);
+        LocalStorage().setAccessToken(userCredential.credential?.accessToken);
+        completer.complete(true);
       } else {
         throw GoogleSignInException(msg: 'User is null');
       }
@@ -57,5 +67,97 @@ class AuthProviders {
       throw GoogleSignInException(msg: e);
     }
     return completer.future;
+  }
+
+  void requestOTP(
+    String phoneNumber,
+    Function(String) onCodeSent, {
+    Function(String)? onAutoRetrievalTimeout = null,
+    Function(Object)? onException = null,
+  }) async {
+    try {
+      await _firebaseAuth.verifyPhoneNumber(
+          phoneNumber: phoneNumber,
+          verificationCompleted: (PhoneAuthCredential credential) {
+            print('verificationCompleted $credential');
+          },
+          verificationFailed: (FirebaseAuthException e) {
+            if (onException != null) {
+              onException(e);
+            }
+          },
+          codeSent: (String verificationId, int? resendToken) {
+            onCodeSent(verificationId);
+          },
+          codeAutoRetrievalTimeout: (String verificationId) {
+            if (onAutoRetrievalTimeout != null) {
+              onAutoRetrievalTimeout(verificationId);
+            }
+          },
+          timeout: const Duration(seconds: 60));
+    } catch (e) {
+      if (onException != null) {
+        onException(e);
+      }
+    }
+  }
+
+  Future<bool> verifyOTP(
+    String verifyId,
+    String smsCode, {
+    Function(Object)? onException = null,
+  }) async {
+    final Completer<bool> completer = Completer();
+    try {
+      final credential = PhoneAuthProvider.credential(verificationId: verifyId, smsCode: smsCode);
+      UserCredential? userCredential = await _firebaseAuth.signInWithCredential(credential);
+      User? user = userCredential.user;
+      if (user != null) {
+        final userProfile = Profile(
+          name: user.displayName,
+          email: user.email,
+          isVerified: user.emailVerified,
+          createdAt: user.metadata.creationTime,
+          lastSignInTime: user.metadata.lastSignInTime,
+          phoneNumber: user.phoneNumber,
+          photoUrl: user.photoURL,
+          providerId: user.providerData.first.providerId,
+          userId: user.providerData.first.uid,
+          uniqueId: user.uid,
+          locale: userCredential.additionalUserInfo?.profile?['locale'] ?? 'Unknown',
+        );
+        if (userCredential.additionalUserInfo!.isNewUser) {
+          await _firebaseFirestore.collection(USER_COLLECTION).doc(user.uid).set(
+                userProfile.toMap(),
+                SetOptions(merge: false),
+              );
+        }
+        LocalStorage().setProfile(userProfile);
+        LocalStorage().setAccessToken(userCredential.credential?.accessToken);
+        completer.complete(true);
+      } else {
+        if (onException != null) {
+          onException(FirebaseAuthException);
+        }
+        completer.complete(false);
+      }
+    } catch (e) {
+      if (onException != null) {
+        onException(e);
+      }
+      completer.complete(false);
+    }
+    return completer.future;
+  }
+
+  void signOut() async {
+    try {
+      await _googleSignIn.signOut();
+      await _firebaseAuth.signOut();
+      LocalStorage().setProfile(null);
+      LocalStorage().setAccessToken(null);
+    } catch (e) {
+      throw SignOutException(msg: e);
+    }
   }
 }

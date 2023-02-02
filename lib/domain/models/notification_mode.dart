@@ -1,0 +1,1 @@
+enum NotificationMode { ON, OFF }
