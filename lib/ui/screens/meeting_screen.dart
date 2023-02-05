@@ -21,7 +21,9 @@ class MeetingScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             HomeMeetingButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(context, '/video_call');
+              },
               icon: Icons.videocam_rounded,
               iconColor: context.colorScheme.onPrimary,
               color: context.colorScheme.primary,

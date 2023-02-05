@@ -2,6 +2,7 @@
     "login": "Login",
     "google_sigin_in": "Login with Google",
     "phone_sigin_in": "Login with phone",
+    "facebook_sigin_in": "Login with Facebook",
     "phone_verify": "Phone verify",
     "phone_number": "Phone Number",
     "verification_code": "Verification code",
@@ -45,5 +46,16 @@
     "updated": "Updated",
     "unknown": "Unknown",
     "login_with_biometrics": "Login with biometrics",
-    "guest_account": "Guest account"
+    "guest_account": "Guest account",
+    "avatar": "Avatar",
+    "room_id": "Room Id",
+    "name": "Name",
+    "description": "Description",
+    "link_avatar": "Link avatar",
+    "server_url": "Server url",
+    "token": "JWT Token",
+    "hint_des_meeting": "Welcome to Life meeting",
+    "hint_des_server_url": "Ex: https://google.com",
+    "hint_des_link_avatar": "Ex: https://image.life.com/dog.png",
+    "hint_des_token": "Jwt token"
 }

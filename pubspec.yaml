@@ -59,6 +59,8 @@ dependencies:
   pinput: ^2.2.21
   local_auth: ^2.1.3
   calendar_view: ^1.0.2
+  image_picker: ^0.8.6+1
+  flutter_facebook_auth: ^5.0.7
 dev_dependencies:
   flutter_test:
     sdk: flutter

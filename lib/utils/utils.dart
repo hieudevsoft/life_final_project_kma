@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:uvid/domain/models/phone_verify_screen_type.dart';
 
 class Utils {
   Utils._();
@@ -24,4 +25,6 @@ class Utils {
       fontSize: 16.0,
     );
   }
+
+  PhoneVerifyPageType phoneVerifyPageType = PhoneVerifyPageType.REGISTER;
 }

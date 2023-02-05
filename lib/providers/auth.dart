@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:local_auth_android/local_auth_android.dart';
@@ -26,6 +27,7 @@ class AuthProviders {
   final LocalAuthentication _localAuthentication = LocalAuthentication();
 
   Stream<User?> get authStateChange => _firebaseAuth.authStateChanges();
+  User? get currentUserFirebase => _firebaseAuth.currentUser;
 
   Future<bool> signInWithGoogleSuccessfully() async {
     final Completer<bool> completer = Completer();
@@ -39,7 +41,7 @@ class AuthProviders {
       UserCredential? userCredential = await _firebaseAuth.signInWithCredential(credential);
       User? user = userCredential.user;
       if (user != null) {
-        final userProfile = Profile(
+        Profile userProfile = Profile(
           name: user.displayName,
           email: user.email,
           isVerified: user.emailVerified,
@@ -57,6 +59,13 @@ class AuthProviders {
                 userProfile.toMap(),
                 SetOptions(merge: false),
               );
+        } else {
+          final docSnapshot = await _firebaseFirestore.collection(USER_COLLECTION).doc(user.uid).get();
+          if (docSnapshot.exists) {
+            if (docSnapshot.data() != null) {
+              userProfile = Profile.fromMap(docSnapshot.data()!).copyWith(lastSignInTime: userProfile.lastSignInTime);
+            }
+          }
         }
         LocalStorage().setProfile(userProfile);
         LocalStorage().setAccessToken(userCredential.credential?.accessToken);
@@ -70,6 +79,59 @@ class AuthProviders {
         throw CancelSignInException(msg: e);
       }
       throw GoogleSignInException(msg: e);
+    }
+    return completer.future;
+  }
+
+  Future<bool> signInWithFacebook() async {
+    final Completer<bool> completer = Completer();
+    try {
+      final LoginResult result = await FacebookAuth.instance.login();
+
+      if (result.status == LoginStatus.success) {
+        final AccessToken? accessToken = result.accessToken;
+        if (accessToken != null) {
+          final OAuthCredential credential = FacebookAuthProvider.credential(result.accessToken!.token);
+          final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+          User? user = userCredential.user;
+          if (user != null) {
+            Profile userProfile = Profile(
+              name: user.displayName,
+              email: user.email,
+              isVerified: user.emailVerified,
+              createdAt: user.metadata.creationTime,
+              lastSignInTime: user.metadata.lastSignInTime,
+              phoneNumber: user.phoneNumber,
+              photoUrl: user.photoURL,
+              providerId: user.providerData.first.providerId,
+              userId: user.providerData.first.uid,
+              uniqueId: user.uid,
+              locale: userCredential.additionalUserInfo?.profile?['locale'] ?? 'Unknown',
+            );
+            if (userCredential.additionalUserInfo!.isNewUser) {
+              await _firebaseFirestore.collection(USER_COLLECTION).doc(user.uid).set(
+                    userProfile.toMap(),
+                    SetOptions(merge: false),
+                  );
+            } else {
+              final docSnapshot = await _firebaseFirestore.collection(USER_COLLECTION).doc(user.uid).get();
+              if (docSnapshot.exists) {
+                if (docSnapshot.data() != null) {
+                  userProfile = Profile.fromMap(docSnapshot.data()!).copyWith(lastSignInTime: userProfile.lastSignInTime);
+                }
+              }
+            }
+            LocalStorage().setProfile(userProfile);
+            LocalStorage().setAccessToken(userCredential.credential?.accessToken);
+            completer.complete(true);
+          }
+        }
+      } else {
+        print('Login facebook failure: ${result.status}, ${result.message}');
+        completer.complete(false);
+      }
+    } catch (e) {
+      rethrow;
     }
     return completer.future;
   }
@@ -110,15 +172,17 @@ class AuthProviders {
   Future<bool> verifyOTP(
     String verifyId,
     String smsCode, {
+    bool isJustVerify = false,
     Function(Object)? onException = null,
+    Function(String?)? onPhoneCallback = null,
   }) async {
     final Completer<bool> completer = Completer();
     try {
       final credential = PhoneAuthProvider.credential(verificationId: verifyId, smsCode: smsCode);
       UserCredential? userCredential = await _firebaseAuth.signInWithCredential(credential);
       User? user = userCredential.user;
-      if (user != null) {
-        final userProfile = Profile(
+      if (user != null && !isJustVerify) {
+        Profile userProfile = Profile(
           name: user.displayName,
           email: user.email,
           isVerified: user.emailVerified,
@@ -136,10 +200,22 @@ class AuthProviders {
                 userProfile.toMap(),
                 SetOptions(merge: false),
               );
+        } else {
+          final docSnapshot = await _firebaseFirestore.collection(USER_COLLECTION).doc(user.uid).get();
+          if (docSnapshot.exists) {
+            if (docSnapshot.data() != null) {
+              userProfile = Profile.fromMap(docSnapshot.data()!).copyWith(lastSignInTime: userProfile.lastSignInTime);
+            }
+          }
         }
         LocalStorage().setProfile(userProfile);
         LocalStorage().setAccessToken(userCredential.credential?.accessToken);
         completer.complete(true);
+      } else if (user != null && isJustVerify) {
+        if (onPhoneCallback != null) {
+          onPhoneCallback(user.phoneNumber);
+          completer.complete(true);
+        }
       } else {
         if (onException != null) {
           onException(FirebaseAuthException);
@@ -203,6 +279,7 @@ class AuthProviders {
     try {
       await _googleSignIn.signOut();
       await _firebaseAuth.signOut();
+      await FacebookAuth.instance.logOut();
       LocalStorage().setProfile(null);
       LocalStorage().setAccessToken(null);
     } catch (e) {

@@ -8,6 +8,7 @@ class MyTextButton extends StatelessWidget {
     this.pressedColor,
     this.overlayColor,
     this.shape,
+    this.onPressed,
   });
 
   final Color? defaultColor;
@@ -15,11 +16,12 @@ class MyTextButton extends StatelessWidget {
   final Color? overlayColor;
   final OutlinedBorder? shape;
   final Widget child;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: () {},
+      onPressed: onPressed,
       style: ButtonStyle(
           foregroundColor: MaterialStateProperty.resolveWith(
             (states) {

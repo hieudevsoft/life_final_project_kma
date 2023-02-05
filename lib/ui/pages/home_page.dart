@@ -50,7 +50,10 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(vertical: 12),
-        child: pages[context.read<HomeManager>().page],
+        child: IndexedStack(
+          children: pages,
+          index: context.watch<HomeManager>().page,
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: context.colorScheme.tertiary,

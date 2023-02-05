@@ -8,6 +8,7 @@ import 'package:uvid/ui/pages/auth/login_page.dart';
 import 'package:uvid/ui/pages/home_page.dart';
 import 'package:uvid/ui/pages/phone_verify_page.dart';
 import 'package:uvid/ui/screens/schedule_calendar_screen.dart';
+import 'package:uvid/ui/screens/video_call_screen.dart';
 import 'package:uvid/ui/widgets/loading.dart';
 import 'package:uvid/utils/connectivity.dart';
 import 'package:uvid/utils/home_manager.dart';
@@ -32,10 +33,11 @@ class _MyUvidAppState extends State<MyUvidApp> {
     AuthProviders().authStateChange.listen((user) {
       Future.delayed(
         const Duration(seconds: 1),
-        () {
-          if (user == null) {
+        () async {
+          final profile = await LocalStorage().getProfile();
+          if (user == null || profile == null) {
             currentPage = LoginPage();
-          } else {
+          } else if (profile != null) {
             currentPage = HomePage();
           }
           setState(() {});
@@ -107,6 +109,7 @@ class _MyUvidAppState extends State<MyUvidApp> {
                 '/home': (context) => const HomePage(),
                 '/phone_verify': (context) => const PhoneVerifyPage(),
                 '/schedule_calendar': (context) => const ScheduleCalendarScreen(),
+                '/video_call': (context) => const VideoCallScreen(),
               },
               home: currentPage ?? fullScreenLoadingWidget(context)),
         );

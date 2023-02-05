@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 class Profile extends Equatable {
@@ -91,6 +92,22 @@ class Profile extends Equatable {
     };
   }
 
+  factory Profile.fromMapFireStore(Map<String, dynamic> map) {
+    return Profile(
+      name: map['name'] != null ? map['name'] as String : null,
+      email: map['email'] != null ? map['email'] as String : null,
+      isVerified: map['isVerified'] != null ? map['isVerified'] as bool : null,
+      createdAt: (map['createdAt'] as Timestamp).toDate(),
+      lastSignInTime: (map['lastSignInTime'] as Timestamp).toDate(),
+      phoneNumber: map['phoneNumber'] != null ? map['phoneNumber'] as String : null,
+      photoUrl: map['photoUrl'] != null ? map['photoUrl'] as String : null,
+      providerId: map['providerId'] != null ? map['providerId'] as String : null,
+      userId: map['userId'] != null ? map['userId'] as String : null,
+      uniqueId: map['uniqueId'] != null ? map['uniqueId'] as String : null,
+      locale: map['locale'] != null ? map['locale'] as String : null,
+    );
+  }
+
   factory Profile.fromMap(Map<String, dynamic> map) {
     return Profile(
       name: map['name'] != null ? map['name'] as String : null,
@@ -113,4 +130,6 @@ class Profile extends Equatable {
 
   @override
   bool get stringify => true;
+
+  bool get avatarUrlIsLink => photoUrl?.contains('http') ?? false;
 }

@@ -3,7 +3,9 @@ import 'package:lottie/lottie.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:uvid/common/constants.dart';
 import 'package:uvid/common/extensions.dart';
+import 'package:uvid/data/local_storage.dart';
 import 'package:uvid/domain/models/language_type.dart';
+import 'package:uvid/domain/models/phone_verify_screen_type.dart';
 import 'package:uvid/exceptions/cancel_sign_in.dart';
 import 'package:uvid/exceptions/google_sign_in.dart';
 import 'package:uvid/providers/auth.dart';
@@ -114,9 +116,71 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
               ),
               gapV24,
               Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 48,
+                ),
+                child: MyElevatedButton(
+                  backgroundColor: Colors.blueAccent.shade400,
+                  isEnabled: _isSignInAvailable,
+                  onPressed: () async {
+                    try {
+                      setState(() {
+                        _isSignInAvailable = false;
+                      });
+                      final isSignInWithFacebookSucessfully = await authProviders.signInWithFacebook();
+                      if (isSignInWithFacebookSucessfully) {
+                        final profile = await LocalStorage().getProfile();
+                        if (profile != null) {
+                          Utils().showToast(AppLocalizations.of(context)!.welcome, backgroundColor: Colors.green.shade200);
+                          context.read<HomeManager>().setProfile(profile);
+                          Navigator.pushReplacementNamed(context, '/home');
+                        }
+                      } else {
+                        setState(() {
+                          _isSignInAvailable = true;
+                        });
+                      }
+                    } catch (e) {
+                      print(e);
+                      setState(() {
+                        _isSignInAvailable = true;
+                      });
+                      Utils().showToast(AppLocalizations.of(context)!.some_thing_went_wrong,
+                          backgroundColor: Colors.redAccent.shade100);
+                    }
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/icons/ic_facebook.png',
+                        fit: BoxFit.cover,
+                        filterQuality: FilterQuality.high,
+                        width: 32,
+                      ),
+                      gapH8,
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          AppLocalizations.of(context)!.facebook_sigin_in,
+                          style: context.textTheme.bodyText1?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 48),
                 child: MyElevatedButton(
-                  backgroundColor: context.colorScheme.background,
+                  backgroundColor: Colors.redAccent.shade200,
                   isEnabled: _isSignInAvailable,
                   onPressed: () async {
                     try {
@@ -125,21 +189,27 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       });
                       final isSignInWithGoogleSucessfully = await authProviders.signInWithGoogleSuccessfully();
                       if (isSignInWithGoogleSucessfully) {
-                        context.read<HomeManager>().onPageChanged(0);
-                        Utils().showToast(AppLocalizations.of(context)!.welcome, backgroundColor: Colors.green.shade200);
-                        Navigator.pushReplacementNamed(context, '/home');
+                        final profile = await LocalStorage().getProfile();
+                        if (profile != null) {
+                          Utils().showToast(AppLocalizations.of(context)!.welcome, backgroundColor: Colors.green.shade200);
+                          context.read<HomeManager>().setProfile(profile);
+                          Navigator.pushReplacementNamed(context, '/home');
+                        }
                       } else {
+                        setState(() {
+                          _isSignInAvailable = true;
+                        });
                         Utils().showToast("Failure!!", backgroundColor: Colors.redAccent.shade200);
                       }
                     } on GoogleSignInException catch (e) {
-                      Utils().showToast(e.msg, backgroundColor: Colors.redAccent.shade200);
+                      Utils().showToast(e.msg.toString(), backgroundColor: Colors.redAccent.shade200);
                     } on CancelSignInException catch (_) {
                       setState(() {
                         _isSignInAvailable = true;
                       });
                     } on Exception {
                       Utils().showToast(AppLocalizations.of(context)!.some_thing_went_wrong,
-                          backgroundColor: Colors.redAccent.shade200);
+                          backgroundColor: Colors.redAccent.shade100);
                     }
                   },
                   child: Row(
@@ -173,9 +243,10 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   horizontal: 48,
                 ),
                 child: MyElevatedButton(
-                  backgroundColor: context.colorScheme.tertiary,
+                  backgroundColor: context.colorScheme.background,
                   isEnabled: _isSignInAvailable,
                   onPressed: () {
+                    Utils().phoneVerifyPageType = PhoneVerifyPageType.REGISTER;
                     Navigator.pushNamed(context, "/phone_verify");
                   },
                   child: Row(
@@ -195,7 +266,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                         child: Text(
                           AppLocalizations.of(context)!.phone_sigin_in,
                           style: context.textTheme.bodyText1?.copyWith(
-                            color: context.colorScheme.onTertiary,
+                            color: context.colorScheme.onBackground,
                             fontWeight: FontWeight.bold,
                           ),
                           textAlign: TextAlign.center,
