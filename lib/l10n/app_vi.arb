@@ -57,5 +57,6 @@
     "hint_des_meeting": "Chào mừng tới Life meeting",
     "hint_des_server_url": "Ví dụ: https://google.com",
     "hint_des_link_avatar": "Ví dụ: https://image.life.com/dog.png",
-    "hint_des_token": "Jwt token"
+    "hint_des_token": "Jwt token",
+    "audio_only": "Chỉ âm thanh"
 }

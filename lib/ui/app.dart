@@ -2,6 +2,7 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:uvid/data/local_storage.dart';
 import 'package:uvid/providers/auth.dart';
 import 'package:uvid/ui/pages/auth/login_page.dart';
@@ -29,11 +30,11 @@ class _MyUvidAppState extends State<MyUvidApp> {
   @override
   void initState() {
     super.initState();
-
     AuthProviders().authStateChange.listen((user) {
       Future.delayed(
         const Duration(seconds: 1),
         () async {
+          FlutterNativeSplash.remove();
           final profile = await LocalStorage().getProfile();
           if (user == null || profile == null) {
             currentPage = LoginPage();
@@ -86,32 +87,33 @@ class _MyUvidAppState extends State<MyUvidApp> {
         return CalendarControllerProvider(
           controller: EventController(),
           child: MaterialApp(
-              locale: context.select<ThemeManager, Locale>((themeManager) => themeManager.locale),
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              localeResolutionCallback: (locale, supportedLocales) {
-                if (locale != null) {
-                  if (supportedLocales.map((e) => e.languageCode).contains(locale.languageCode)) {
-                    return locale;
-                  } else {
-                    return Locale('en');
-                  }
+            locale: context.select<ThemeManager, Locale>((themeManager) => themeManager.locale),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localeResolutionCallback: (locale, supportedLocales) {
+              if (locale != null) {
+                if (supportedLocales.map((e) => e.languageCode).contains(locale.languageCode)) {
+                  return locale;
                 } else {
                   return Locale('en');
                 }
-              },
-              theme: ThemeManager().light,
-              darkTheme: ThemeManager().dark,
-              themeMode: context.select<ThemeManager, ThemeMode>((themeManager) => themeManager.themeMode),
-              debugShowCheckedModeBanner: kDebugMode,
-              routes: {
-                '/login': (context) => const LoginPage(),
-                '/home': (context) => const HomePage(),
-                '/phone_verify': (context) => const PhoneVerifyPage(),
-                '/schedule_calendar': (context) => const ScheduleCalendarScreen(),
-                '/video_call': (context) => const VideoCallScreen(),
-              },
-              home: currentPage ?? fullScreenLoadingWidget(context)),
+              } else {
+                return Locale('en');
+              }
+            },
+            theme: ThemeManager().light,
+            darkTheme: ThemeManager().dark,
+            themeMode: context.select<ThemeManager, ThemeMode>((themeManager) => themeManager.themeMode),
+            debugShowCheckedModeBanner: kDebugMode,
+            routes: {
+              '/login': (context) => const LoginPage(),
+              '/home': (context) => const HomePage(),
+              '/phone_verify': (context) => const PhoneVerifyPage(),
+              '/schedule_calendar': (context) => const ScheduleCalendarScreen(),
+              '/video_call': (context) => const VideoCallScreen(),
+            },
+            home: currentPage ?? fullScreenLoadingWidget(context),
+          ),
         );
       },
     );

@@ -57,5 +57,6 @@
     "hint_des_meeting": "Welcome to Life meeting",
     "hint_des_server_url": "Ex: https://google.com",
     "hint_des_link_avatar": "Ex: https://image.life.com/dog.png",
-    "hint_des_token": "Jwt token"
+    "hint_des_token": "Jwt token",
+    "audio_only": "Audio only"
 }

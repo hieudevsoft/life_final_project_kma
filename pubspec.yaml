@@ -61,6 +61,7 @@ dependencies:
   calendar_view: ^1.0.2
   image_picker: ^0.8.6+1
   flutter_facebook_auth: ^5.0.7
+  flutter_native_splash: ^2.2.16
 dev_dependencies:
   flutter_test:
     sdk: flutter
