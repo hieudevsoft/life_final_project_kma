@@ -5,7 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:uvid/ui/screens/contact_screen.dart';
 import 'package:uvid/ui/screens/history_meeting_screen.dart';
 import 'package:uvid/ui/screens/setting_screen.dart';
-import 'package:uvid/utils/home_manager.dart';
+import 'package:uvid/utils/state_managment/home_manager.dart';
 
 import '../screens/meeting_screen.dart';
 
@@ -48,12 +48,9 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: context.colorScheme.tertiary,
         foregroundColor: context.colorScheme.onTertiary,
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(vertical: 12),
-        child: IndexedStack(
-          children: pages,
-          index: context.watch<HomeManager>().page,
-        ),
+      body: IndexedStack(
+        children: pages,
+        index: context.watch<HomeManager>().page,
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: context.colorScheme.tertiary,

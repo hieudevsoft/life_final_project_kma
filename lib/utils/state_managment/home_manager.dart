@@ -2,6 +2,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:uvid/data/local_storage.dart';
 import 'package:uvid/domain/models/audio_mode.dart';
+import 'package:uvid/domain/models/contact_mode.dart';
 import 'package:uvid/domain/models/notification_mode.dart';
 import 'package:uvid/domain/models/profile.dart';
 import 'package:uvid/domain/models/video_mode.dart';
@@ -31,6 +32,9 @@ class HomeManager extends ChangeNotifier {
     loadFutureData();
   }
   static final _instance = HomeManager._internal();
+  factory HomeManager() {
+    return _instance;
+  }
 
   Map _source = {ConnectivityResult.none: false};
   final UvidAppConnectivity _networkConnectivity = UvidAppConnectivity();
@@ -41,10 +45,6 @@ class HomeManager extends ChangeNotifier {
     LocalStorage().setProfile(newProfile);
     profile = newProfile;
     notifyListeners();
-  }
-
-  factory HomeManager() {
-    return _instance;
   }
 
   Future loadFutureData() async {
@@ -86,6 +86,15 @@ class HomeManager extends ChangeNotifier {
     if (isMute == _isMuteNotification) return;
     _isMuteNotification = isMute;
     LocalStorage().setNotificationMode(notificationMode);
+    notifyListeners();
+  }
+
+  ContactMode _searchContactMode = ContactMode.NAME;
+  ContactMode get searchContactMode => _searchContactMode;
+  onChangeSearchContactMode(ContactMode searchContactMode) {
+    if (searchContactMode == _searchContactMode) return;
+    _searchContactMode = searchContactMode;
+    LocalStorage().setContactsMode(searchContactMode);
     notifyListeners();
   }
 

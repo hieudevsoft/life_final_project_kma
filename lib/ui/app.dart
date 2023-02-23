@@ -2,7 +2,7 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
+//import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:uvid/data/local_storage.dart';
 import 'package:uvid/providers/auth.dart';
 import 'package:uvid/ui/pages/auth/login_page.dart';
@@ -12,8 +12,8 @@ import 'package:uvid/ui/screens/schedule_calendar_screen.dart';
 import 'package:uvid/ui/screens/video_call_screen.dart';
 import 'package:uvid/ui/widgets/loading.dart';
 import 'package:uvid/utils/connectivity.dart';
-import 'package:uvid/utils/home_manager.dart';
-import 'package:uvid/utils/theme.dart';
+import 'package:uvid/utils/state_managment/home_manager.dart';
+import 'package:uvid/utils/state_managment/theme.dart';
 import 'package:provider/provider.dart';
 
 class MyUvidApp extends StatefulWidget {
@@ -34,7 +34,7 @@ class _MyUvidAppState extends State<MyUvidApp> {
       Future.delayed(
         const Duration(seconds: 1),
         () async {
-          FlutterNativeSplash.remove();
+          //FlutterNativeSplash.remove();
           final profile = await LocalStorage().getProfile();
           if (user == null || profile == null) {
             currentPage = LoginPage();
@@ -54,6 +54,7 @@ class _MyUvidAppState extends State<MyUvidApp> {
     LocalStorage().getAudioMode().then((value) => homeManager.onChangeMuteAudio(value));
     LocalStorage().getVideoMode().then((value) => homeManager.onChangeMuteVideo(value));
     LocalStorage().getNotificationMode().then((value) => homeManager.onChangeMuteNotification(value));
+    LocalStorage().getSearchContactsMode().then((value) => homeManager.onChangeSearchContactMode(value));
   }
 
   @override

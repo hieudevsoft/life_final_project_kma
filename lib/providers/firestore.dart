@@ -4,8 +4,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uvid/common/constants.dart';
 import 'package:uvid/domain/models/profile.dart';
+import 'package:uvid/ui/widgets/floating_search_bar.dart';
 
 class FirestoreProviders {
+  FirestoreProviders._internal();
+  static final _instance = FirestoreProviders._internal();
+  factory FirestoreProviders() {
+    return _instance;
+  }
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -33,6 +40,24 @@ class FirestoreProviders {
     } catch (e) {
       completer.complete(false);
     }
+    return completer.future;
+  }
+
+  Future<List<Profile>> getAllProfile() {
+    Completer<List<Profile>> completer = Completer<List<Profile>>();
+    final List<Profile> profiles = [];
+    _firestore.collection(USER_COLLECTION).get().then((QuerySnapshot querySnapshot) {
+      querySnapshot.docChanges.forEach((element) {
+        final doc = element.doc;
+        if (doc.exists) {
+          if (doc.data() is Map<String, dynamic>) {
+            final profile = Profile.fromMap(doc.data() as Map<String, dynamic>);
+            profiles.add(profile);
+          }
+        }
+      });
+      completer.complete(profiles);
+    });
     return completer.future;
   }
 }

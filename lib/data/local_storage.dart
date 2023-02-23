@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uvid/domain/models/audio_mode.dart';
+import 'package:uvid/domain/models/contact_mode.dart';
 import 'package:uvid/domain/models/language_type.dart';
 import 'package:uvid/domain/models/notification_mode.dart';
 import 'package:uvid/domain/models/profile.dart';
@@ -66,6 +69,16 @@ class LocalStorage {
     await storage.write(key: 'video_mode', value: videoMode.name);
   }
 
+  Future<ContactMode> getSearchContactsMode() async {
+    final contactMode = await storage.read(key: 'contacts_mode');
+    if (contactMode == null) return ContactMode.NAME;
+    return ContactMode.values.firstWhere((element) => element.name == contactMode);
+  }
+
+  void setContactsMode(ContactMode contactMode) async {
+    await storage.write(key: 'contacts_mode', value: contactMode.name);
+  }
+
   Future<Profile?> getProfile() async {
     final jsonProfile = await storage.read(key: 'profile');
     if (jsonProfile == null) return null;
@@ -91,6 +104,23 @@ class LocalStorage {
       await storage.delete(key: 'access_token');
     } else {
       await storage.write(key: 'access_token', value: accessToken);
+    }
+  }
+
+  Future<List<String>> getSearchContactHistories() async {
+    final histories = await storage.read(key: 'search_contact_histories');
+    if (histories == null) {
+      return [];
+    }
+    final result = (json.decode(histories) as List<dynamic>).map((e) => e.toString()).toList();
+    return result;
+  }
+
+  void setSearchContactHistories(List<String> histories) async {
+    if (histories.isEmpty) {
+      await storage.delete(key: 'search_contact_histories');
+    } else {
+      await storage.write(key: 'search_contact_histories', value: json.encode(histories));
     }
   }
 }

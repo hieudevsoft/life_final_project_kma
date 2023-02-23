@@ -12,8 +12,8 @@ import 'package:uvid/providers/auth.dart';
 import 'package:uvid/ui/widgets/elevated_button.dart';
 import 'package:uvid/ui/widgets/gap.dart';
 import 'package:uvid/ui/widgets/popup_menu.dart';
-import 'package:uvid/utils/home_manager.dart';
-import 'package:uvid/utils/theme.dart';
+import 'package:uvid/utils/state_managment/home_manager.dart';
+import 'package:uvid/utils/state_managment/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:uvid/utils/utils.dart';
 

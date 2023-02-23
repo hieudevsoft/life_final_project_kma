@@ -58,5 +58,7 @@
     "hint_des_server_url": "Ví dụ: https://google.com",
     "hint_des_link_avatar": "Ví dụ: https://image.life.com/dog.png",
     "hint_des_token": "Jwt token",
-    "audio_only": "Chỉ âm thanh"
+    "audio_only": "Chỉ âm thanh",
+    "search": "Tìm kiếm",
+    "no_result": "Không có kết quả tìm kiếm"
 }

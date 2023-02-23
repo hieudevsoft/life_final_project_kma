@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
+import 'package:uvid/domain/models/contact_model.dart';
 
 class Profile extends Equatable {
   final String? name;
@@ -132,4 +133,14 @@ class Profile extends Equatable {
   bool get stringify => true;
 
   bool get avatarUrlIsLink => photoUrl?.contains('http') ?? false;
+
+  ContactModel toContactModel() {
+    return ContactModel(
+      this.uniqueId,
+      this.userId,
+      this.name,
+      this.email ?? this.phoneNumber,
+      this.photoUrl,
+    );
+  }
 }

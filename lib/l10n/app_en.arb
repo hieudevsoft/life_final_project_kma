@@ -58,5 +58,7 @@
     "hint_des_server_url": "Ex: https://google.com",
     "hint_des_link_avatar": "Ex: https://image.life.com/dog.png",
     "hint_des_token": "Jwt token",
-    "audio_only": "Audio only"
+    "audio_only": "Audio only",
+    "search": "Search",
+    "no_result": "No result"
 }

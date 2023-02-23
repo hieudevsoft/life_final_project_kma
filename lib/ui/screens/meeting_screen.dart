@@ -4,8 +4,8 @@ import 'package:uvid/common/extensions.dart';
 import 'package:uvid/ui/widgets/gap.dart';
 import 'package:uvid/ui/widgets/home_meeting_button.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:uvid/utils/home_manager.dart';
-import 'package:uvid/utils/theme.dart';
+import 'package:uvid/utils/state_managment/home_manager.dart';
+import 'package:uvid/utils/state_managment/theme.dart';
 
 class MeetingScreen extends StatelessWidget {
   const MeetingScreen({

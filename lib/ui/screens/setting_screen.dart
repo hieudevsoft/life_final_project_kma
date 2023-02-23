@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:uvid/common/extensions.dart';
 import 'package:uvid/data/local_storage.dart';
 import 'package:uvid/domain/models/audio_mode.dart';
+import 'package:uvid/domain/models/contact_mode.dart';
 import 'package:uvid/domain/models/language_type.dart';
 import 'package:uvid/domain/models/notification_mode.dart';
 import 'package:uvid/domain/models/phone_verify_screen_type.dart';
@@ -22,8 +23,8 @@ import 'package:uvid/ui/widgets/elevated_button.dart';
 import 'package:uvid/ui/widgets/gap.dart';
 import 'package:uvid/ui/widgets/popup_menu.dart';
 import 'package:uvid/ui/widgets/text_button.dart';
-import 'package:uvid/utils/home_manager.dart';
-import 'package:uvid/utils/theme.dart';
+import 'package:uvid/utils/state_managment/home_manager.dart';
+import 'package:uvid/utils/state_managment/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:uvid/utils/utils.dart';
 
@@ -125,7 +126,14 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
                   ),
                   gapV12,
                   _buildRowNotificationOptionSetting(context),
-                  gapV12
+                  gapV12,
+                  Divider(
+                    color: context.colorScheme.onPrimary,
+                    thickness: 1,
+                  ),
+                  gapV12,
+                  _buildRowSearchContactOptionSetting(context),
+                  gapV12,
                 ],
               ),
             ),
@@ -736,6 +744,61 @@ Widget _buildRowNotificationOptionSetting(BuildContext context) {
             initialValue: isMuteNotification ? NotificationMode.OFF : NotificationMode.ON,
             onUvidPopupSelected: (type) {
               context.read<HomeManager>().onChangeMuteNotification(type);
+            },
+            dropdownColor: context.colorScheme.onPrimary,
+          )
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildRowSearchContactOptionSetting(BuildContext context) {
+  final searchContactMode = context.select<HomeManager, ContactMode>(((homeManager) => homeManager.searchContactMode));
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 8),
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context)!.contacts,
+              style: context.textTheme.subtitle1?.copyWith(
+                fontSize: 18,
+                color: context.colorScheme.onPrimary,
+                fontWeight: FontWeight.w900,
+              ),
+              textAlign: TextAlign.start,
+            ),
+          ),
+          Icon(
+            searchContactMode == ContactMode.NAME
+                ? Icons.person_rounded
+                : searchContactMode == ContactMode.EMAIL
+                    ? Icons.email_rounded
+                    : Icons.phone_rounded,
+            size: 24,
+            color: context.colorScheme.onPrimary,
+          ),
+          gapH8,
+          Text(
+            context.typeAsString(searchContactMode),
+            style: context.textTheme.subtitle1?.copyWith(
+              fontSize: 16,
+              color: context.colorScheme.onPrimary,
+              fontWeight: FontWeight.w900,
+            ),
+            textAlign: TextAlign.start,
+          ),
+          UvidPopupMenu<ContactMode>(
+            values: ContactMode.values,
+            initialValue: searchContactMode,
+            onUvidPopupSelected: (type) {
+              context.read<HomeManager>().onChangeSearchContactMode(type);
             },
             dropdownColor: context.colorScheme.onPrimary,
           )
