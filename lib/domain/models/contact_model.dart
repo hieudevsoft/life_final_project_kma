@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
@@ -9,6 +10,7 @@ class ContactModel extends Equatable {
   final String? name;
   final String? description;
   final String? urlLinkImage;
+  final int friendStatus;
 
   ContactModel(
     this.keyId,
@@ -16,10 +18,8 @@ class ContactModel extends Equatable {
     this.name,
     this.description,
     this.urlLinkImage,
+    this.friendStatus,
   );
-
-  @override
-  bool? get stringify => true;
 
   ContactModel copyWith({
     String? keyId,
@@ -27,6 +27,7 @@ class ContactModel extends Equatable {
     String? name,
     String? description,
     String? urlLinkImage,
+    int? friendStatus,
   }) {
     return ContactModel(
       keyId ?? this.keyId,
@@ -34,11 +35,24 @@ class ContactModel extends Equatable {
       name ?? this.name,
       description ?? this.description,
       urlLinkImage ?? this.urlLinkImage,
+      friendStatus ?? this.friendStatus,
     );
   }
 
   @override
-  List<Object> get props => [keyId ?? '', userId ?? '', name ?? '', description ?? ''];
+  List<Object> get props {
+    return [
+      keyId ?? '',
+      userId ?? '',
+      name ?? '',
+      description ?? '',
+      urlLinkImage ?? '',
+      friendStatus,
+    ];
+  }
+
+  @override
+  bool get stringify => true;
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
@@ -47,16 +61,18 @@ class ContactModel extends Equatable {
       'name': name,
       'description': description,
       'urlLinkImage': urlLinkImage,
+      'friendStatus': friendStatus,
     };
   }
 
   factory ContactModel.fromMap(Map<String, dynamic> map) {
     return ContactModel(
-      map['keyId'] as String,
-      map['userId'] as String,
-      map['name'] as String,
-      map['description'] as String,
-      map['urlLinkImage'] as String,
+      map['keyId'] != null ? map['keyId'] as String : null,
+      map['userId'] != null ? map['userId'] as String : null,
+      map['name'] != null ? map['name'] as String : null,
+      map['description'] != null ? map['description'] as String : null,
+      map['urlLinkImage'] != null ? map['urlLinkImage'] as String : null,
+      map['friendStatus'] as int,
     );
   }
 

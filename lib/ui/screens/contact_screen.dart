@@ -1,57 +1,118 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:uvid/common/extensions.dart';
+import 'package:uvid/domain/models/contact_mode.dart';
 import 'package:uvid/domain/models/contact_model.dart';
+import 'package:uvid/ui/widgets/bouncing_widget.dart';
 import 'package:uvid/ui/widgets/floating_search_bar.dart';
 import 'package:uvid/ui/widgets/gap.dart';
 import 'package:uvid/utils/state_managment/contact_manager.dart';
+import 'package:uvid/utils/utils.dart';
 
 import '../widgets/painter/custom_shape_painter.dart';
 
-class ContactScreen extends StatefulWidget {
+class ContactScreen extends StatelessWidget {
   const ContactScreen({super.key});
 
   @override
-  State<ContactScreen> createState() => _ContactScreenState();
-}
-
-class _ContactScreenState extends State<ContactScreen> {
-  @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ContactManager>(
-      create: (context) {
-        return ContactManager();
-      },
+      create: (ctx) => ContactManager(),
       builder: (context, child) {
-        return Builder(
-          builder: (context) {
-            final FilterSearchModel? filterSearchModel = context.select<ContactManager, FilterSearchModel?>((cm) {
-              return cm.filterSearchModel;
-            });
-            if (filterSearchModel == null) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            } else {
-              return FloatingSearchBarWidget(
-                filterSearchModel: filterSearchModel,
-                onSubmitted: (filterSearchModel) async {
-                  context.read<ContactManager>().setFilterSearchModel(filterSearchModel);
-                  context.read<ContactManager>().search(filterSearchModel.searchTerm);
-                },
-                onDeletedItem: (filterSearchModel) async {
-                  context.read<ContactManager>().setFilterSearchModel(filterSearchModel);
-                },
-                body: SearchResultsListView(
-                  contacts: context.watch<ContactManager>().contactsAvailable,
+        final isGuess = context.select<ContactManager, bool>((cm) {
+          return cm.isGuessAccount;
+        });
+        if (isGuess) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                clipBehavior: Clip.antiAliasWithSaveLayer,
+                child: Image.asset(
+                  'assets/ic_launcher.png',
+                  width: context.screenWidth / 2,
                 ),
-              );
-            }
-          },
-        );
+              ),
+              gapV8,
+              Text(
+                AppLocalizations.of(context)!.account_unverified,
+                style: context.textTheme.bodyText1?.copyWith(
+                  color: context.colorScheme.onTertiary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          );
+        } else {
+          final FilterSearchModel? filterSearchModel = context.watch<ContactManager>().filterSearchModel;
+          if (filterSearchModel == null) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else {
+            return FloatingSearchBarWidget(
+              filterSearchModel: filterSearchModel,
+              onSubmitted: (filterSearchModel) async {
+                context.read<ContactManager>().setFilterSearchModel(filterSearchModel);
+                context.read<ContactManager>().search(filterSearchModel.searchTerm);
+              },
+              onDeletedItem: (filterSearchModel) async {
+                context.read<ContactManager>().setFilterSearchModel(filterSearchModel);
+              },
+              body: Column(
+                children: [
+                  Expanded(
+                    child: SearchResultsListView(
+                      contacts: context.watch<ContactManager>().contactsAvailable,
+                      onAddFriendClickListener: (contactModel) {
+                        context.read<ContactManager>().triggerHandleFriend(
+                          contactModel,
+                          2,
+                          onComplete: () {
+                            Utils().showToast(
+                              AppLocalizations.of(context)!.send_add_friend_successfully,
+                              backgroundColor: Colors.greenAccent,
+                              textColor: Colors.white,
+                            );
+                          },
+                        );
+                      },
+                      onSendUnfriendClickListener: (contactModel) {
+                        context.read<ContactManager>().triggerHandleFriend(contactModel, 0, onComplete: () {
+                          Utils().showToast(
+                            AppLocalizations.of(context)!.cancel_add_friend_successfully,
+                            backgroundColor: Colors.greenAccent,
+                            textColor: Colors.white,
+                          );
+                        });
+                      },
+                      onUnfriendClickListener: (contactModel) {
+                        context.read<ContactManager>().triggerHandleFriend(contactModel, 0, isRemoveFriend: true, onComplete: () {
+                          Utils().showToast(
+                            AppLocalizations.of(context)!.unfriend_successfully,
+                            backgroundColor: Colors.greenAccent,
+                            textColor: Colors.white,
+                          );
+                        });
+                      },
+                      onResetClickListener: () {
+                        context.read<ContactManager>().resetFilterSearchModel();
+                      },
+                    ),
+                  )
+                ],
+              ),
+            );
+          }
+        }
       },
     );
   }
@@ -59,9 +120,17 @@ class _ContactScreenState extends State<ContactScreen> {
 
 class SearchResultsListView extends StatefulWidget {
   final List<ContactModel> contacts;
+  final Function(ContactModel contactModel) onAddFriendClickListener;
+  final Function(ContactModel contactModel) onUnfriendClickListener;
+  final Function(ContactModel contactModel) onSendUnfriendClickListener;
+  final Function() onResetClickListener;
   const SearchResultsListView({
     Key? key,
     required this.contacts,
+    required this.onAddFriendClickListener,
+    required this.onSendUnfriendClickListener,
+    required this.onUnfriendClickListener,
+    required this.onResetClickListener,
   }) : super(key: key);
   @override
   State<SearchResultsListView> createState() => _SearchResultsListViewState();
@@ -94,7 +163,12 @@ class _SearchResultsListViewState extends State<SearchResultsListView> {
   @override
   Widget build(BuildContext context) {
     final fsb = FloatingSearchBar.of(context);
-    if (widget.contacts.isEmpty) {
+    final isLoading = context.watch<ContactManager>().isLoadingSearch;
+    if (isLoading) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    } else if (widget.contacts.isEmpty) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -129,9 +203,9 @@ class _SearchResultsListViewState extends State<SearchResultsListView> {
               top: fsb?.widget.height ?? 0 + (fsb?.widget.margins?.vertical ?? 0),
               bottom: fsb?.widget.height ?? 0 + (fsb?.widget.margins?.vertical ?? 0),
             ),
-            children: List.generate(
-              widget.contacts.length,
-              (index) => Center(
+            children: List.generate(widget.contacts.length, (index) {
+              final item = widget.contacts[index];
+              return Center(
                 child: Padding(
                   padding: const EdgeInsets.only(top: 24, left: 16, right: 16),
                   child: Stack(
@@ -179,12 +253,26 @@ class _SearchResultsListViewState extends State<SearchResultsListView> {
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               clipBehavior: Clip.antiAliasWithSaveLayer,
-                              child: Image.asset(
-                                'assets/ic_launcher.png',
-                                height: 64,
-                                width: 64,
-                                fit: BoxFit.cover,
-                              ),
+                              child: item.urlLinkImage == null
+                                  ? Image.asset(
+                                      'assets/ic_launcher.png',
+                                      height: 64,
+                                      width: 64,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : item.urlLinkImage!.contains('http')
+                                      ? Image.network(
+                                          item.urlLinkImage!,
+                                          fit: BoxFit.cover,
+                                          height: 64,
+                                          width: 64,
+                                        )
+                                      : Image.memory(
+                                          base64Decode(item.urlLinkImage!),
+                                          fit: BoxFit.cover,
+                                          height: 64,
+                                          width: 64,
+                                        ),
                             ),
                             gapH16,
                             Expanded(
@@ -194,7 +282,7 @@ class _SearchResultsListViewState extends State<SearchResultsListView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   Text(
-                                    widget.contacts[index].name ?? 'Hacker',
+                                    item.name ?? 'Hacker',
                                     style: context.textTheme.bodyText1?.copyWith(
                                       fontWeight: FontWeight.w900,
                                       color: Colors.white70,
@@ -203,7 +291,7 @@ class _SearchResultsListViewState extends State<SearchResultsListView> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   Text(
-                                    widget.contacts[index].description ?? 'Hacker',
+                                    item.description ?? 'Hacker',
                                     style: context.textTheme.bodyText1?.copyWith(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w900,
@@ -233,18 +321,28 @@ class _SearchResultsListViewState extends State<SearchResultsListView> {
                             ),
                             gapH8,
                             FloatingActionButton(
-                              backgroundColor: getStartColorCute(index),
+                              backgroundColor: item.friendStatus == 2
+                                  ? Colors.redAccent
+                                  : item.friendStatus == 0
+                                      ? getStartColorCute(index)
+                                      : Colors.greenAccent,
                               foregroundColor: Colors.white,
                               splashColor: getEndColorCute(index),
                               elevation: 12,
                               mini: true,
-                              child: Icon(Icons.person_add_rounded),
+                              child: Icon(item.friendStatus == 2
+                                  ? Icons.person_add_disabled
+                                  : item.friendStatus == 0
+                                      ? Icons.person_add_rounded
+                                      : Icons.person_off_rounded),
                               onPressed: () {
-                                scrollController.animateTo(
-                                  0,
-                                  duration: const Duration(milliseconds: 100),
-                                  curve: Curves.linear,
-                                );
+                                if (item.friendStatus == 0) {
+                                  widget.onAddFriendClickListener(item);
+                                } else if (item.friendStatus == 2) {
+                                  widget.onSendUnfriendClickListener(item);
+                                } else {
+                                  widget.onUnfriendClickListener(item);
+                                }
                               },
                             ),
                             gapH8,
@@ -254,31 +352,48 @@ class _SearchResultsListViewState extends State<SearchResultsListView> {
                     ],
                   ),
                 ),
-              ),
-            ),
+              );
+            }),
           ),
           Positioned(
-            bottom: 16,
-            right: 16,
-            child: Visibility(
-              visible: _isScrollToTopVisible,
-              child: FloatingActionButton(
-                backgroundColor: context.colorScheme.onSecondary,
-                foregroundColor: Colors.white,
-                splashColor: context.colorScheme.primary,
-                isExtended: true,
-                elevation: 24,
-                child: Icon(Icons.arrow_upward_rounded),
-                onPressed: () {
-                  scrollController.animateTo(
-                    0,
-                    duration: const Duration(milliseconds: 100),
-                    curve: Curves.linear,
-                  );
-                },
-              ),
-            ),
-          ),
+              bottom: 16,
+              right: 16,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  FloatingActionButton(
+                    backgroundColor: Colors.redAccent,
+                    foregroundColor: Colors.white,
+                    splashColor: context.colorScheme.primary,
+                    isExtended: true,
+                    elevation: 24,
+                    child: Icon(Icons.change_circle_rounded),
+                    onPressed: () {
+                      widget.onResetClickListener.call();
+                    },
+                  ),
+                  Visibility(
+                    visible: _isScrollToTopVisible,
+                    child: FloatingActionButton(
+                      backgroundColor: context.colorScheme.onSecondary,
+                      foregroundColor: Colors.white,
+                      splashColor: context.colorScheme.primary,
+                      isExtended: true,
+                      elevation: 24,
+                      child: Icon(Icons.arrow_upward_rounded),
+                      onPressed: () {
+                        scrollController.animateTo(
+                          0,
+                          duration: const Duration(milliseconds: 100),
+                          curve: Curves.linear,
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              )),
         ],
       );
     }

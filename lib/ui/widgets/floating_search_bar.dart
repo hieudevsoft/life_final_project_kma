@@ -83,7 +83,6 @@ class _FloatingSearchBarState extends State<FloatingSearchBarWidget> {
   late FilterSearchModel filterSearchModel;
   late List<String> filteredList;
   late FloatingSearchBarController controller;
-  late String selectedItem;
 
   @override
   void initState() {
@@ -91,7 +90,6 @@ class _FloatingSearchBarState extends State<FloatingSearchBarWidget> {
     controller = FloatingSearchBarController();
     filterSearchModel = widget.filterSearchModel;
     filteredList = filterSearchModel.filterSearchTerms();
-    selectedItem = "";
   }
 
   @override
@@ -163,7 +161,7 @@ class _FloatingSearchBarState extends State<FloatingSearchBarWidget> {
                                 setState(() {
                                   filterSearchModel = filterSearchModel.copyWith(searchTerm: term);
                                   filterSearchModel.addSearchTerm(term);
-                                  selectedItem = term;
+
                                   widget.onSubmitted(filterSearchModel);
                                 });
                                 controller.close();
@@ -192,7 +190,7 @@ class _FloatingSearchBarState extends State<FloatingSearchBarWidget> {
       openWidth: context.screenWidth,
       axisAlignment: -1,
       title: Text(
-        selectedItem.isEmpty ? AppLocalizations.of(context)!.search : selectedItem,
+        filterSearchModel.searchTerm.isEmpty ? AppLocalizations.of(context)!.search : filterSearchModel.searchTerm,
         style: context.textTheme.bodyText1?.copyWith(
           color: context.colorScheme.onSecondary,
           fontWeight: FontWeight.w800,
@@ -221,7 +219,6 @@ class _FloatingSearchBarState extends State<FloatingSearchBarWidget> {
         setState(() {
           filterSearchModel = filterSearchModel.copyWith(searchTerm: query);
           filterSearchModel.addSearchTerm(query);
-          selectedItem = query;
           widget.onSubmitted(filterSearchModel);
         });
         controller.close();

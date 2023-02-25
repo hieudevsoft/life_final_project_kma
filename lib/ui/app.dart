@@ -8,13 +8,17 @@ import 'package:uvid/providers/auth.dart';
 import 'package:uvid/ui/pages/auth/login_page.dart';
 import 'package:uvid/ui/pages/home_page.dart';
 import 'package:uvid/ui/pages/phone_verify_page.dart';
+import 'package:uvid/ui/screens/friend_screen.dart';
 import 'package:uvid/ui/screens/schedule_calendar_screen.dart';
 import 'package:uvid/ui/screens/video_call_screen.dart';
 import 'package:uvid/ui/widgets/loading.dart';
 import 'package:uvid/utils/connectivity.dart';
+import 'package:uvid/utils/routes.dart';
 import 'package:uvid/utils/state_managment/home_manager.dart';
-import 'package:uvid/utils/state_managment/theme.dart';
+import 'package:uvid/utils/state_managment/theme_manager.dart';
 import 'package:provider/provider.dart';
+
+final GlobalKey mtAppKey = GlobalKey();
 
 class MyUvidApp extends StatefulWidget {
   const MyUvidApp({super.key});
@@ -45,7 +49,6 @@ class _MyUvidAppState extends State<MyUvidApp> {
         },
       );
     });
-
     themeManager = ThemeManager();
     LocalStorage().getIsDarkMode().then((value) => themeManager.toggleTheme(value));
     LocalStorage().getLanguage().then((value) => themeManager.toggleLocale(value));
@@ -88,6 +91,7 @@ class _MyUvidAppState extends State<MyUvidApp> {
         return CalendarControllerProvider(
           controller: EventController(),
           child: MaterialApp(
+            key: mtAppKey,
             locale: context.select<ThemeManager, Locale>((themeManager) => themeManager.locale),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
@@ -106,13 +110,7 @@ class _MyUvidAppState extends State<MyUvidApp> {
             darkTheme: ThemeManager().dark,
             themeMode: context.select<ThemeManager, ThemeMode>((themeManager) => themeManager.themeMode),
             debugShowCheckedModeBanner: kDebugMode,
-            routes: {
-              '/login': (context) => const LoginPage(),
-              '/home': (context) => const HomePage(),
-              '/phone_verify': (context) => const PhoneVerifyPage(),
-              '/schedule_calendar': (context) => const ScheduleCalendarScreen(),
-              '/video_call': (context) => const VideoCallScreen(),
-            },
+            routes: AppRoutesDirect.getAppRoutes(),
             home: currentPage ?? fullScreenLoadingWidget(context),
           ),
         );

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uvid/domain/models/audio_mode.dart';
 import 'package:uvid/domain/models/contact_mode.dart';
+import 'package:uvid/domain/models/contact_model.dart';
 import 'package:uvid/domain/models/language_type.dart';
 import 'package:uvid/domain/models/notification_mode.dart';
 import 'package:uvid/domain/models/profile.dart';
@@ -122,5 +123,30 @@ class LocalStorage {
     } else {
       await storage.write(key: 'search_contact_histories', value: json.encode(histories));
     }
+  }
+
+  Future<List<ContactModel>> getCachedContacts() async {
+    final contacts = await storage.read(key: "cached_contacts");
+    if (contacts == null) return [];
+    final result = (json.decode(contacts) as List<dynamic>).map((e) => ContactModel.fromJson(e)).toList();
+    return result;
+  }
+
+  void setCachedContacts(List<ContactModel> contacts) async {
+    if (contacts.isEmpty) {
+      return;
+    }
+    await storage.write(key: "cached_contacts", value: json.encode(contacts));
+  }
+
+  void updateContactLocal(ContactModel contactModel) async {
+    final cachedContacts = await getCachedContacts();
+    final index = cachedContacts.indexWhere((element) => element.userId == contactModel.userId);
+    if (index == -1) {
+      cachedContacts.add(contactModel);
+    } else {
+      cachedContacts[index] = contactModel;
+    }
+    setCachedContacts(cachedContacts);
   }
 }

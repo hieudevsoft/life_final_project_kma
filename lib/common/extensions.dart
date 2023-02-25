@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:uvid/domain/models/audio_mode.dart';
 import 'package:uvid/domain/models/contact_mode.dart';
 import 'package:uvid/domain/models/language_type.dart';
@@ -122,4 +123,16 @@ Color getStartColorCute(int index) {
 
 Color getEndColorCute(int index) {
   return mapStartEndColorCute.entries.toList()[index % mapStartEndColorCute.length].value;
+}
+
+int getTimeNowInWholeMilliseconds() {
+  return DateTime.now().millisecondsSinceEpoch;
+}
+
+DateTime millisecondsToDateTime(int milliseconds) {
+  return DateTime.fromMillisecondsSinceEpoch(milliseconds);
+}
+
+String getStringDateFromDateTime(DateTime dateTime, String pattern) {
+  return DateFormat(pattern).format(dateTime);
 }

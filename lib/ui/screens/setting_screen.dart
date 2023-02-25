@@ -23,8 +23,9 @@ import 'package:uvid/ui/widgets/elevated_button.dart';
 import 'package:uvid/ui/widgets/gap.dart';
 import 'package:uvid/ui/widgets/popup_menu.dart';
 import 'package:uvid/ui/widgets/text_button.dart';
+import 'package:uvid/utils/routes.dart';
 import 'package:uvid/utils/state_managment/home_manager.dart';
-import 'package:uvid/utils/state_managment/theme.dart';
+import 'package:uvid/utils/state_managment/theme_manager.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:uvid/utils/utils.dart';
 
@@ -52,7 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
       Future.delayed(
         Duration(milliseconds: 300),
         () {
-          Navigator.popAndPushNamed(context, '/login');
+          Navigator.popAndPushNamed(context, AppRoutesDirect.login.route);
         },
       );
     } on SignOutException catch (e) {
@@ -360,7 +361,7 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
               child: MyTextButton(
                 onPressed: () {
                   Utils().phoneVerifyPageType = PhoneVerifyPageType.UPDATE_PHONE;
-                  Navigator.pushNamed(context, '/phone_verify');
+                  Navigator.pushNamed(context, AppRoutesDirect.phonevify.route);
                 },
                 child: Text(
                   AppLocalizations.of(context)!.update_your_number,
@@ -766,7 +767,7 @@ Widget _buildRowSearchContactOptionSetting(BuildContext context) {
         children: [
           Expanded(
             child: Text(
-              AppLocalizations.of(context)!.contacts,
+              AppLocalizations.of(context)!.mode_search_contact,
               style: context.textTheme.subtitle1?.copyWith(
                 fontSize: 18,
                 color: context.colorScheme.onPrimary,

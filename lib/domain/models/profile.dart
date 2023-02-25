@@ -135,12 +135,6 @@ class Profile extends Equatable {
   bool get avatarUrlIsLink => photoUrl?.contains('http') ?? false;
 
   ContactModel toContactModel() {
-    return ContactModel(
-      this.uniqueId,
-      this.userId,
-      this.name,
-      this.email ?? this.phoneNumber,
-      this.photoUrl,
-    );
+    return ContactModel(this.uniqueId, this.userId, this.name, this.email ?? this.phoneNumber, this.photoUrl, 0);
   }
 }

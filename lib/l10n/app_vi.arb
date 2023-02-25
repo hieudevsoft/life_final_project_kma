@@ -60,5 +60,10 @@
     "hint_des_token": "Jwt token",
     "audio_only": "Chỉ âm thanh",
     "search": "Tìm kiếm",
-    "no_result": "Không có kết quả tìm kiếm"
+    "no_result": "Không có dữ liệu",
+    "mode_search_contact": "Tìm kiếm liên hệ",
+    "send_add_friend_successfully": "Gửi lời mời kết bạn thành công!",
+    "cancel_add_friend_successfully": "Hủy lời mời kết bạn thành công",
+    "unfriend_successfully": "Đã hủy kết bạn",
+    "friend": "Bạn bè"
 }
