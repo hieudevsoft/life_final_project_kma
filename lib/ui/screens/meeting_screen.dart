@@ -12,6 +12,7 @@ import 'package:uvid/ui/widgets/page_animation/single_route_scale_builder.dart';
 import 'package:uvid/ui/widgets/page_animation/single_route_size_builder.dart';
 import 'package:uvid/ui/widgets/page_animation/two_route_slide_builder.dart';
 import 'package:uvid/utils/routes.dart';
+import 'package:uvid/utils/state_managment/contact_manager.dart';
 import 'package:uvid/utils/state_managment/home_manager.dart';
 import 'package:uvid/utils/state_managment/theme_manager.dart';
 
@@ -54,7 +55,14 @@ class MeetingScreen extends StatelessWidget {
               ),
             ),
             HomeMeetingButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    SingleRouteFadeBuilder(
+                      mtAppKey: mtAppKey,
+                      routeName: AppRoutesDirect.joinScreen.route,
+                    ));
+              },
               icon: Icons.add_box_rounded,
               iconColor: context.colorScheme.onPrimary,
               color: context.colorScheme.primary,
@@ -136,7 +144,8 @@ class MeetingScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
               ),
-              isHasBaged: !context.read<HomeManager>().isMuteNotification,
+              isHasBaged:
+                  !context.read<HomeManager>().isMuteNotification && context.read<ContactManager>().contactsAvailable.isNotEmpty,
             ),
           ],
         ),

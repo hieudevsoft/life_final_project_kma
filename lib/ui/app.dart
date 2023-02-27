@@ -14,6 +14,8 @@ import 'package:uvid/ui/screens/video_call_screen.dart';
 import 'package:uvid/ui/widgets/loading.dart';
 import 'package:uvid/utils/connectivity.dart';
 import 'package:uvid/utils/routes.dart';
+import 'package:uvid/utils/state_managment/contact_manager.dart';
+import 'package:uvid/utils/state_managment/friend_manager.dart';
 import 'package:uvid/utils/state_managment/home_manager.dart';
 import 'package:uvid/utils/state_managment/theme_manager.dart';
 import 'package:provider/provider.dart';
@@ -85,7 +87,13 @@ class _MyUvidAppState extends State<MyUvidApp> {
           dispose: (_, customConnectivity) {
             customConnectivity.disposeStream();
           },
-        )
+        ),
+        ChangeNotifierProvider(
+          create: (context) => ContactManager(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => FriendManager(),
+        ),
       ],
       builder: (context, child) {
         return CalendarControllerProvider(

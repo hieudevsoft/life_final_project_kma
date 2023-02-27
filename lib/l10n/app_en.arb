@@ -65,5 +65,8 @@
     "send_add_friend_successfully": "Send add friend successfully",
     "cancel_add_friend_successfully": "Cancel add friend successfully",
     "unfriend_successfully": "Unfriend successfully",
-    "friend": "Friend"
+    "friend": "Friend",
+    "unavailable_get_frined": "Unavailable get friends",
+    "room_id_must_not_empty": "Room id must not empty",
+    "copied": "Copied"
 }

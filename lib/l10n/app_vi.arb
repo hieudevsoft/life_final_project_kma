@@ -65,5 +65,8 @@
     "send_add_friend_successfully": "Gửi lời mời kết bạn thành công!",
     "cancel_add_friend_successfully": "Hủy lời mời kết bạn thành công",
     "unfriend_successfully": "Đã hủy kết bạn",
-    "friend": "Bạn bè"
+    "friend": "Bạn bè",
+    "unavailable_get_frined": "Chưa sẵn sàng lấy danh sách bạn bè",
+    "room_id_must_not_empty": "Mã phòng không được để trống",
+    "copied": "Đã sao chép"
 }

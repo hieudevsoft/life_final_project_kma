@@ -41,8 +41,11 @@ class HomeManager extends ChangeNotifier {
   String statusInternet = '';
 
   Profile? profile = null;
-  void setProfile(Profile newProfile) {
+  void setProfile(Profile? newProfile) {
     LocalStorage().setProfile(newProfile);
+    if (profile == null) {
+      LocalStorage().setAccessToken(null);
+    }
     profile = newProfile;
     notifyListeners();
   }

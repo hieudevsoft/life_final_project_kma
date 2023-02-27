@@ -63,6 +63,7 @@ dependencies:
   flutter_facebook_auth: ^5.0.7
   material_floating_search_bar: ^0.3.7
   firebase_database: ^10.0.14
+  platform_device_id: ^1.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

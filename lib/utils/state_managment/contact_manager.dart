@@ -124,13 +124,13 @@ class ContactManager extends ChangeNotifier {
       onComplete?.call();
     } else if (friendStatus == 0) {
       if (contactModel.keyId != null) {
-        await _ref.child(contactModel.keyId!).child(_user!.uniqueId.toString()).remove();
+        await _ref.child(WAITING_ACCEPT_FRIEND_COLLECTION).child(contactModel.keyId!).child(_user!.uniqueId.toString()).remove();
         onComplete?.call();
       }
       onComplete?.call();
     } else {
       if (contactModel.keyId != null) {
-        await _ref.child(contactModel.keyId!).child(_user!.uniqueId.toString()).update({
+        await _ref.child(WAITING_ACCEPT_FRIEND_COLLECTION).child(contactModel.keyId!).child(_user!.uniqueId.toString()).update({
           'userId': contactModel.userId,
           'name': contactModel.name,
           'image': contactModel.urlLinkImage,

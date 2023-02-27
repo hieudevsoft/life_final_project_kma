@@ -1,65 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:jitsi_meet/jitsi_meet.dart';
-import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:uvid/common/extensions.dart';
 import 'package:uvid/domain/models/custom_jitsi_config_options.dart';
-import 'package:uvid/domain/models/profile.dart';
-import 'package:uvid/providers/auth.dart';
 import 'package:uvid/providers/jitsimeet.dart';
-import 'package:uvid/ui/screens/setting_screen.dart';
 import 'package:uvid/ui/widgets/elevated_button.dart';
 import 'package:uvid/ui/widgets/gap.dart';
-import 'package:uvid/ui/widgets/meeting_option.dart';
 import 'package:uvid/utils/state_managment/home_manager.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:uvid/utils/utils.dart';
 
-class VideoCallScreen extends StatefulWidget {
-  const VideoCallScreen({Key? key}) : super(key: key);
+class JoinScreen extends StatefulWidget {
+  const JoinScreen({super.key});
 
   @override
-  State<VideoCallScreen> createState() => _VideoCallScreenState();
+  State<JoinScreen> createState() => _JoinScreenState();
 }
 
-class _VideoCallScreenState extends State<VideoCallScreen> {
-  final AuthProviders _authMethods = AuthProviders();
+class _JoinScreenState extends State<JoinScreen> {
   late TextEditingController meetingIdController;
   late TextEditingController nameController;
-  late TextEditingController desController;
-  late TextEditingController serverUrlController;
-  late TextEditingController tokenController;
   late TextEditingController userAvatarURLController;
-  bool audioOnly = false;
-  bool isShowMoreOptions = false;
-
-  final JitsiMeetProviders _jitsiMeetMethods = JitsiMeetProviders();
 
   @override
   void initState() {
-    meetingIdController = TextEditingController();
-    nameController = TextEditingController(
-      text: _authMethods.currentUserFirebase?.displayName,
-    );
-    desController = TextEditingController();
-    serverUrlController = TextEditingController();
-    tokenController = TextEditingController();
-    userAvatarURLController = TextEditingController();
-
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    meetingIdController.dispose();
-    nameController.dispose();
-    userAvatarURLController.dispose();
-    serverUrlController.dispose();
-    desController.dispose();
-    tokenController.dispose();
-    JitsiMeet.removeAllListeners();
+    meetingIdController = TextEditingController(text: '');
+    nameController = TextEditingController(text: '');
+    userAvatarURLController = TextEditingController(text: '');
   }
 
   _joinMeeting(BuildContext context) {
@@ -77,18 +46,16 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     }
     final userAvatar = userAvatarURLController.text.isEmpty ? avatarProfile : userAvatarURLController.text;
     final CustomJitsiConfigOptions jitsiConfigOptions = CustomJitsiConfigOptions(
-        room: meetingIdController.text,
-        audioMuted: context.read<HomeManager>().isMuteAudio,
-        videoMuted: context.read<HomeManager>().isMuteAudio,
-        userDisplayName: userDisplayName,
-        userAvatarURL: userAvatar,
-        subject: desController.text,
-        serverURL: serverUrlController.text,
-        token: tokenController.text,
-        userAuthencation: profile?.email ?? profile?.phoneNumber,
-        audioOnly: audioOnly);
-    _jitsiMeetMethods.createMeeting(
+      room: meetingIdController.text,
+      audioMuted: context.read<HomeManager>().isMuteAudio,
+      videoMuted: context.read<HomeManager>().isMuteAudio,
+      userDisplayName: userDisplayName,
+      userAvatarURL: userAvatar,
+      userAuthencation: profile?.email ?? profile?.phoneNumber,
+    );
+    JitsiMeetProviders().createMeeting(
       customJitsiConfigOptions: jitsiConfigOptions,
+      isOwnerRoom: false,
       onRoomIdNotSetup: () {
         Utils().showToast(
           AppLocalizations.of(context)!.room_id_must_not_empty,
@@ -105,12 +72,21 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    meetingIdController.dispose();
+    nameController.dispose();
+    userAvatarURLController.dispose();
+    JitsiMeet.removeAllListeners();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         title: Text(
-          AppLocalizations.of(context)!.new_meeting,
+          AppLocalizations.of(context)!.join_meeting,
           style: context.textTheme.bodyText1?.copyWith(
             color: context.colorScheme.onPrimary,
             fontSize: 24,
@@ -199,53 +175,14 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
               gapV4,
               _buildTextFieldOption(context, meetingIdController, AppLocalizations.of(context)!.room_id),
               gapV12,
-              _buildTextTitle(context, AppLocalizations.of(context)!.description),
-              gapV4,
-              _buildTextFieldOption(context, desController, AppLocalizations.of(context)!.hint_des_meeting),
-              gapV12,
               _buildTextTitle(context, AppLocalizations.of(context)!.name),
               gapV4,
-              _buildTextFieldOption(context, nameController, AppLocalizations.of(context)!.link_avatar),
+              _buildTextFieldOption(context, nameController, AppLocalizations.of(context)!.name),
               gapV12,
-              Align(
-                alignment: Alignment.center,
-                child: FloatingActionButton(
-                  heroTag: null,
-                  onPressed: () {
-                    setState(() {
-                      isShowMoreOptions = !isShowMoreOptions;
-                    });
-                  },
-                  mini: true,
-                  backgroundColor: context.colorScheme.background,
-                  splashColor: context.colorScheme.primary,
-                  child: Icon(
-                    isShowMoreOptions ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
-                    color: context.colorScheme.onBackground,
-                  ),
-                ),
-              ),
-              Visibility(
-                visible: isShowMoreOptions,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    _buildTextTitle(context, AppLocalizations.of(context)!.link_avatar),
-                    gapV4,
-                    _buildTextFieldOption(context, userAvatarURLController, AppLocalizations.of(context)!.hint_des_link_avatar),
-                    gapV12,
-                    _buildTextTitle(context, AppLocalizations.of(context)!.server_url),
-                    gapV4,
-                    _buildTextFieldOption(context, serverUrlController, AppLocalizations.of(context)!.hint_des_server_url),
-                    gapV12,
-                    _buildTextTitle(context, AppLocalizations.of(context)!.token),
-                    gapV4,
-                    _buildTextFieldOption(context, tokenController, AppLocalizations.of(context)!.hint_des_token),
-                  ],
-                ),
-              ),
-              gapV16,
+              _buildTextTitle(context, AppLocalizations.of(context)!.link_avatar),
+              gapV4,
+              _buildTextFieldOption(context, userAvatarURLController, AppLocalizations.of(context)!.link_avatar),
+              gapV12,
               Align(
                 alignment: Alignment.center,
                 child: MyElevatedButton(
@@ -266,39 +203,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                   },
                 ),
               ),
-              gapV24,
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: MeetingOption(
-                  text: AppLocalizations.of(context)!.audio_only,
-                  isMute: audioOnly,
-                  onChange: (change) {
-                    setState(() {
-                      audioOnly = !audioOnly;
-                    });
-                  },
-                ),
-              ),
-              gapV8,
-              Divider(
-                color: context.colorScheme.onBackground,
-              ),
-              gapV12,
-              buildRowMuteAudioOptionSetting(context),
-              Visibility(
-                visible: !audioOnly,
-                child: Column(
-                  children: [
-                    gapV12,
-                    Divider(
-                      color: context.colorScheme.onBackground,
-                    ),
-                    gapV12,
-                    buildRowMuteVideoOptionSetting(context),
-                  ],
-                ),
-              ),
-              gapV48,
             ],
           ),
         ),

@@ -20,36 +20,37 @@ class ContactScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ContactManager>(
-      create: (ctx) => ContactManager(),
-      builder: (context, child) {
+    return Builder(
+      builder: (context) {
         final isGuess = context.select<ContactManager, bool>((cm) {
           return cm.isGuessAccount;
         });
         if (isGuess) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                clipBehavior: Clip.antiAliasWithSaveLayer,
-                child: Image.asset(
-                  'assets/ic_launcher.png',
-                  width: context.screenWidth / 2,
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  child: Image.asset(
+                    'assets/ic_launcher.png',
+                    width: context.screenWidth / 2,
+                  ),
                 ),
-              ),
-              gapV8,
-              Text(
-                AppLocalizations.of(context)!.account_unverified,
-                style: context.textTheme.bodyText1?.copyWith(
-                  color: context.colorScheme.onTertiary,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+                gapV8,
+                Text(
+                  AppLocalizations.of(context)!.account_unverified,
+                  style: context.textTheme.bodyText1?.copyWith(
+                    color: context.colorScheme.onTertiary,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+              ],
+            ),
           );
         } else {
           final FilterSearchModel? filterSearchModel = context.watch<ContactManager>().filterSearchModel;
@@ -305,6 +306,7 @@ class _SearchResultsListViewState extends State<SearchResultsListView> {
                             ),
                             gapH16,
                             FloatingActionButton(
+                              heroTag: null,
                               backgroundColor: getStartColorCute(index),
                               foregroundColor: Colors.white,
                               splashColor: getEndColorCute(index),
@@ -321,6 +323,7 @@ class _SearchResultsListViewState extends State<SearchResultsListView> {
                             ),
                             gapH8,
                             FloatingActionButton(
+                              heroTag: null,
                               backgroundColor: item.friendStatus == 2
                                   ? Colors.redAccent
                                   : item.friendStatus == 0
@@ -364,6 +367,7 @@ class _SearchResultsListViewState extends State<SearchResultsListView> {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   FloatingActionButton(
+                    heroTag: null,
                     backgroundColor: Colors.redAccent,
                     foregroundColor: Colors.white,
                     splashColor: context.colorScheme.primary,
@@ -377,6 +381,7 @@ class _SearchResultsListViewState extends State<SearchResultsListView> {
                   Visibility(
                     visible: _isScrollToTopVisible,
                     child: FloatingActionButton(
+                      heroTag: null,
                       backgroundColor: context.colorScheme.onSecondary,
                       foregroundColor: Colors.white,
                       splashColor: context.colorScheme.primary,

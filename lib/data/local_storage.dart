@@ -149,4 +149,33 @@ class LocalStorage {
     }
     setCachedContacts(cachedContacts);
   }
+
+  Future<List<String>> getCachedFriendIds() async {
+    final contacts = await storage.read(key: "cached_friend_ids");
+    if (contacts == null) return [];
+    final result = (json.decode(contacts) as List<dynamic>).map((e) => e as String).toList();
+    return result;
+  }
+
+  void setCachedFriendIds(List<String> contacts) async {
+    if (contacts.isEmpty) {
+      return;
+    }
+    await storage.write(key: "cached_friend_ids", value: json.encode(contacts));
+  }
+
+  void updateCachedFriendIds(String uniqueId, {isRemoved = false}) async {
+    final cachedFriendIds = await getCachedFriendIds();
+    final index = cachedFriendIds.indexWhere((element) => element == uniqueId);
+    if (index == -1) {
+      cachedFriendIds.add(uniqueId);
+    } else {
+      if (isRemoved) {
+        cachedFriendIds.removeAt(index);
+      } else {
+        cachedFriendIds[index] = uniqueId;
+      }
+    }
+    setCachedFriendIds(cachedFriendIds);
+  }
 }

@@ -241,6 +241,7 @@ Widget _buildBody(BuildContext context, ScrollController scrollController, bool 
                         ),
                         gapH16,
                         FloatingActionButton(
+                          heroTag: null,
                           backgroundColor: Colors.redAccent,
                           foregroundColor: Colors.white,
                           splashColor: getEndColorCute(index),
@@ -253,6 +254,7 @@ Widget _buildBody(BuildContext context, ScrollController scrollController, bool 
                         ),
                         gapH8,
                         FloatingActionButton(
+                          heroTag: null,
                           backgroundColor: Colors.greenAccent,
                           foregroundColor: Colors.white,
                           splashColor: getEndColorCute(index),
@@ -282,6 +284,7 @@ Widget _buildBody(BuildContext context, ScrollController scrollController, bool 
                 Visibility(
                   visible: isScrollToTopVisible,
                   child: FloatingActionButton(
+                    heroTag: null,
                     backgroundColor: context.colorScheme.onSecondary,
                     foregroundColor: Colors.white,
                     splashColor: context.colorScheme.primary,

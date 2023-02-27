@@ -7,6 +7,10 @@ class HistoryMeetingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return SizedBox();
+  }
+
+  Widget _old() {
     return StreamBuilder(
       stream: FirestoreProviders().meetingsHistory,
       builder: (context, snapshot) {

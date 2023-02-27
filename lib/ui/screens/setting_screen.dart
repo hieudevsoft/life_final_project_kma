@@ -50,6 +50,7 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
     try {
       AuthProviders().signOut();
       Utils().showToast(AppLocalizations.of(context)!.sign_out_successfully, backgroundColor: Colors.greenAccent.shade200);
+      context.read<HomeManager>().setProfile(null);
       Future.delayed(
         Duration(milliseconds: 300),
         () {
@@ -454,6 +455,7 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
           ),
         ),
         FloatingActionButton(
+          heroTag: null,
           onPressed: () {
             onClickShowMore();
           },

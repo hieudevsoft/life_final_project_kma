@@ -1,8 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'package:path/path.dart';
 import 'package:uvid/common/constants.dart';
 import 'package:uvid/common/extensions.dart';
 import 'package:uvid/data/local_storage.dart';
@@ -19,7 +16,6 @@ class NotificationManager extends ChangeNotifier {
   }
 
   DatabaseReference _ref = FirebaseDatabase.instance.ref();
-  FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Profile? _user = null;
   List<FriendModel>? waitingAccepts = null;
 
@@ -27,13 +23,12 @@ class NotificationManager extends ChangeNotifier {
     fetchWaittingFriendAccept();
   }
 
-  final fakeKey = 'fgm5KEcbTvYSfApAuSDucmuSuPr1';
   fetchWaittingFriendAccept() async {
     if (_user == null) {
       _user = await LocalStorage().getProfile();
     }
     if (_user != null) {
-      _ref.child(fakeKey).once().then(
+      _ref.child(WAITING_ACCEPT_FRIEND_COLLECTION).child(_user!.uniqueId!).once().then(
         (DatabaseEvent databaseEvent) {
           final snapshot = databaseEvent.snapshot;
           if (snapshot.exists) {
@@ -70,7 +65,7 @@ class NotificationManager extends ChangeNotifier {
     final isExist = cachedContacts.indexWhere((element) => element.userId == userId) != -1;
     if (isExist) {
       final contact = cachedContacts.firstWhere((element) => element.userId == userId);
-      await _ref.child(fakeKey).child(contact.keyId!).remove();
+      await _ref.child(WAITING_ACCEPT_FRIEND_COLLECTION).child(_user!.uniqueId!).child(contact.keyId!).remove();
       waitingAccepts!.removeWhere((element) => element.userId == userId);
       LocalStorage().updateContactLocal(contact.copyWith(friendStatus: 0));
       notifyListeners();
@@ -83,12 +78,10 @@ class NotificationManager extends ChangeNotifier {
     final isExist = cachedContacts.indexWhere((element) => element.userId == userId) != -1;
     if (isExist) {
       final contact = cachedContacts.firstWhere((element) => element.userId == userId);
-      await _firestore
-          .collection(FRIEND_COLLECTION)
-          .doc(_user!.uniqueId)
-          .collection(contact.keyId!)
-          .doc('data')
-          .set({'time': getTimeNowInWholeMilliseconds()});
+      await _ref.child(FRIEND_COLLECTION).child(_user!.uniqueId!).child(contact.keyId!).set({
+        'time': getTimeNowInWholeMilliseconds(),
+      });
+      await _ref.child(WAITING_ACCEPT_FRIEND_COLLECTION).child(_user!.uniqueId!).child(contact.keyId!).remove();
       waitingAccepts!.removeWhere((element) => element.userId == userId);
       LocalStorage().updateContactLocal(contact.copyWith(friendStatus: 0));
       notifyListeners();

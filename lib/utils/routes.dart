@@ -5,6 +5,7 @@ import 'package:uvid/ui/pages/auth/login_page.dart';
 import 'package:uvid/ui/pages/home_page.dart';
 import 'package:uvid/ui/pages/phone_verify_page.dart';
 import 'package:uvid/ui/screens/friend_screen.dart';
+import 'package:uvid/ui/screens/join_screen.dart';
 import 'package:uvid/ui/screens/notification_screen.dart';
 import 'package:uvid/ui/screens/schedule_calendar_screen.dart';
 import 'package:uvid/ui/screens/video_call_screen.dart';
@@ -18,6 +19,7 @@ abstract class AppRoutesDirect {
   static final Route videoCall = Route(route: '/video_call', build: (ctx) => const VideoCallScreen());
   static final Route friend = Route(route: '/friend', build: (ctx) => const FriendScreen());
   static final Route notification = Route(route: '/notification', build: (ctx) => const NotificationScreen());
+  static final Route joinScreen = Route(route: '/join_screen', build: (ctx) => const JoinScreen());
 
   static get _routes => [
         login,
@@ -27,6 +29,7 @@ abstract class AppRoutesDirect {
         videoCall,
         friend,
         notification,
+        joinScreen,
       ];
 
   static Map<String, Widget Function(BuildContext)> getAppRoutes() {
