@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 //import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:uvid/firebase_options.dart';
+import 'package:uvid/utils/notifications.dart';
 import 'ui/app.dart';
 
 void main() async {
@@ -12,5 +13,6 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  NotificationManager().initialize();
   runApp(const MyUvidApp());
 }

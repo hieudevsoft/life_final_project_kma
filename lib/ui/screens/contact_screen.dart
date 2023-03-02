@@ -11,6 +11,7 @@ import 'package:uvid/ui/widgets/bouncing_widget.dart';
 import 'package:uvid/ui/widgets/floating_search_bar.dart';
 import 'package:uvid/ui/widgets/gap.dart';
 import 'package:uvid/utils/state_managment/contact_manager.dart';
+import 'package:uvid/utils/state_managment/friend_manager.dart';
 import 'package:uvid/utils/utils.dart';
 
 import '../widgets/painter/custom_shape_painter.dart';
@@ -87,22 +88,32 @@ class ContactScreen extends StatelessWidget {
                         );
                       },
                       onSendUnfriendClickListener: (contactModel) {
-                        context.read<ContactManager>().triggerHandleFriend(contactModel, 0, onComplete: () {
-                          Utils().showToast(
-                            AppLocalizations.of(context)!.cancel_add_friend_successfully,
-                            backgroundColor: Colors.greenAccent,
-                            textColor: Colors.white,
-                          );
-                        });
+                        context.read<ContactManager>().triggerHandleFriend(
+                          contactModel,
+                          0,
+                          onComplete: () {
+                            Utils().showToast(
+                              AppLocalizations.of(context)!.cancel_add_friend_successfully,
+                              backgroundColor: Colors.greenAccent,
+                              textColor: Colors.white,
+                            );
+                          },
+                        );
                       },
                       onUnfriendClickListener: (contactModel) {
-                        context.read<ContactManager>().triggerHandleFriend(contactModel, 0, isRemoveFriend: true, onComplete: () {
-                          Utils().showToast(
-                            AppLocalizations.of(context)!.unfriend_successfully,
-                            backgroundColor: Colors.greenAccent,
-                            textColor: Colors.white,
-                          );
-                        });
+                        context.read<ContactManager>().triggerHandleFriend(
+                          contactModel,
+                          0,
+                          isRemoveFriend: true,
+                          onComplete: () {
+                            context.read<FriendManager>().removeFriendLocal(contactModel.keyId!);
+                            Utils().showToast(
+                              AppLocalizations.of(context)!.unfriend_successfully,
+                              backgroundColor: Colors.greenAccent,
+                              textColor: Colors.white,
+                            );
+                          },
+                        );
                       },
                       onResetClickListener: () {
                         context.read<ContactManager>().resetFilterSearchModel();
@@ -307,28 +318,11 @@ class _SearchResultsListViewState extends State<SearchResultsListView> {
                             gapH16,
                             FloatingActionButton(
                               heroTag: null,
-                              backgroundColor: getStartColorCute(index),
-                              foregroundColor: Colors.white,
-                              splashColor: getEndColorCute(index),
-                              elevation: 12,
-                              mini: true,
-                              child: Icon(Icons.phone_rounded),
-                              onPressed: () {
-                                scrollController.animateTo(
-                                  0,
-                                  duration: const Duration(milliseconds: 100),
-                                  curve: Curves.linear,
-                                );
-                              },
-                            ),
-                            gapH8,
-                            FloatingActionButton(
-                              heroTag: null,
                               backgroundColor: item.friendStatus == 2
                                   ? Colors.redAccent
                                   : item.friendStatus == 0
                                       ? getStartColorCute(index)
-                                      : Colors.greenAccent,
+                                      : Colors.amberAccent,
                               foregroundColor: Colors.white,
                               splashColor: getEndColorCute(index),
                               elevation: 12,

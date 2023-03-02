@@ -56,7 +56,11 @@ class ContactManager extends ChangeNotifier {
     isLoadingSearch = true;
     contactsAvailable.clear();
     notifyListeners();
-    if (query.isEmpty) return;
+    if (query.isEmpty) {
+      isLoadingSearch = false;
+      notifyListeners();
+      return;
+    }
     final searchContactMode = await LocalStorage().getSearchContactsMode();
     final field = searchContactMode == ContactMode.NAME
         ? 'name'
@@ -87,15 +91,23 @@ class ContactManager extends ChangeNotifier {
         .startAt([query.toUpperCase()]).endAt([query.toLowerCase() + '\uf8ff']).get();
 
     if (snapshots.docs.isNotEmpty) {
-      snapshots.docs.forEach((element) {
+      snapshots.docs.forEach((element) async {
         if (element.exists) {
           final profile = Profile.fromMap(element.data());
-          final contact = profile.toContactModel();
+          ContactModel contact = profile.toContactModel();
+          final friend = await _ref.child(FRIEND_COLLECTION).child(_user!.uniqueId!).child(contact.keyId!).get();
+          if (friend.exists) {
+            contact = contact.copyWith(friendStatus: 1);
+          }
           final isMe = profile.uniqueId == _user?.uniqueId;
-          final isOnCached = contactsAvailable.indexWhere((element) => element.userId == contact.userId) != -1;
+          final isOnCached = contactsAvailable.indexWhere((element) => element == contact) != -1;
           if (!isMe && !isOnCached) {
-            print(contact.name);
-            contactsAvailable.add(contact);
+            final indexSameId = contactsAvailable.indexWhere((element) => element.keyId == contact.keyId);
+            if (indexSameId != -1) {
+              contactsAvailable[indexSameId] = contact;
+            } else {
+              contactsAvailable.add(contact);
+            }
             LocalStorage().updateContactLocal(contact);
             notifyListeners();
           }
@@ -120,7 +132,9 @@ class ContactManager extends ChangeNotifier {
     contactsAvailable[index] = contactModel;
 
     if (isRemoveFriend && friendStatus == 0) {
-      //TODO remove friend
+      await _ref.child(FRIEND_COLLECTION).child(_user!.uniqueId!).child(contactModel.keyId!).remove();
+      final index = contactsAvailable.indexOf(contactModel);
+      contactsAvailable[index] = contactModel.copyWith(friendStatus: 0);
       onComplete?.call();
     } else if (friendStatus == 0) {
       if (contactModel.keyId != null) {

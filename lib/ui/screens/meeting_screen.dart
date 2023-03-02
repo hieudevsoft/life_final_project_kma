@@ -11,6 +11,7 @@ import 'package:uvid/ui/widgets/page_animation/single_route_in_right_builder.dar
 import 'package:uvid/ui/widgets/page_animation/single_route_scale_builder.dart';
 import 'package:uvid/ui/widgets/page_animation/single_route_size_builder.dart';
 import 'package:uvid/ui/widgets/page_animation/two_route_slide_builder.dart';
+import 'package:uvid/utils/notifications.dart';
 import 'package:uvid/utils/routes.dart';
 import 'package:uvid/utils/state_managment/contact_manager.dart';
 import 'package:uvid/utils/state_managment/home_manager.dart';
@@ -56,12 +57,14 @@ class MeetingScreen extends StatelessWidget {
             ),
             HomeMeetingButton(
               onPressed: () {
-                Navigator.push(
-                    context,
-                    SingleRouteFadeBuilder(
-                      mtAppKey: mtAppKey,
-                      routeName: AppRoutesDirect.joinScreen.route,
-                    ));
+                // Navigator.push(
+                //   context,
+                //   SingleRouteFadeBuilder(
+                //     mtAppKey: mtAppKey,
+                //     routeName: AppRoutesDirect.joinScreen.route,
+                //   ),
+                // );
+                NotificationManager().showScheduledNotification();
               },
               icon: Icons.add_box_rounded,
               iconColor: context.colorScheme.onPrimary,

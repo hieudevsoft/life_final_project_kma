@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:uvid/common/extensions.dart';
+import 'package:uvid/domain/models/friend_model.dart';
 import 'package:uvid/domain/models/profile.dart';
 import 'package:uvid/ui/widgets/bouncing_widget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -71,12 +72,30 @@ class _FriendScreenState extends State<FriendScreen> {
           ),
         ),
       ),
-      body: _buildBody(context),
+      body: _buildBody(
+        context,
+        onPhoneCall: (profile) {
+          //!TODO make phone call
+        },
+        onRemovedFriend: (profile) {
+          context.read<FriendManager>().removeFriend(profile, () {
+            Utils().showToast(
+              AppLocalizations.of(context)!.unfriend_successfully,
+              backgroundColor: Colors.greenAccent,
+              textColor: Colors.white,
+            );
+          });
+        },
+      ),
     );
   }
 }
 
-Widget _buildBody(BuildContext context) {
+Widget _buildBody(
+  BuildContext context, {
+  required Function(Profile)? onPhoneCall,
+  required Function(Profile)? onRemovedFriend,
+}) {
   final List<Profile>? friends = context.watch<FriendManager>().friends;
   print(friends);
   if (friends == null) {
@@ -214,7 +233,9 @@ Widget _buildBody(BuildContext context) {
                                 elevation: 12,
                                 mini: true,
                                 child: Icon(Icons.person_off_rounded),
-                                onPressed: () {},
+                                onPressed: () {
+                                  onRemovedFriend?.call(friend);
+                                },
                               ),
                               FloatingActionButton(
                                 heroTag: null,
@@ -224,7 +245,9 @@ Widget _buildBody(BuildContext context) {
                                 elevation: 12,
                                 mini: true,
                                 child: Icon(Icons.phone_rounded),
-                                onPressed: () {},
+                                onPressed: () {
+                                  onPhoneCall?.call(friend);
+                                },
                               ),
                             ],
                           )

@@ -92,6 +92,24 @@ class FriendManager extends ChangeNotifier {
     });
   }
 
+  void removeFriend(
+    Profile profile,
+    Function onComplete,
+  ) async {
+    if (_user == null) return;
+    await _ref.child(FRIEND_COLLECTION).child(_user!.uniqueId!).child(profile.uniqueId!).remove();
+    onComplete.call();
+    removeFriendLocal(profile.uniqueId!);
+  }
+
+  void removeFriendLocal(String uniqueId) {
+    if (friends == null || friends!.isEmpty) {
+      return;
+    }
+    friends!.removeWhere((element) => element.uniqueId == uniqueId);
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     super.dispose();

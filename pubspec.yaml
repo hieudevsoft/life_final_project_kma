@@ -64,6 +64,7 @@ dependencies:
   material_floating_search_bar: ^0.3.7
   firebase_database: ^10.0.14
   platform_device_id: ^1.0.1
+  awesome_notifications: ^0.0.6+10
 dev_dependencies:
   flutter_test:
     sdk: flutter

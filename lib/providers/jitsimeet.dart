@@ -26,7 +26,6 @@ class JitsiMeetProviders {
   _initData() async {
     _profile = await LocalStorage().getProfile();
     _deviceId = await PlatformDeviceId.getDeviceId;
-    debugPrint(_deviceId);
   }
 
   void createMeeting({
@@ -36,8 +35,6 @@ class JitsiMeetProviders {
     bool isOwnerRoom = true,
   }) async {
     try {
-      Map<FeatureFlagEnum, bool> featureFlag = Map<FeatureFlagEnum, bool>();
-
       String? name = customJitsiConfigOptions.userDisplayName;
       if (name == null || name.isEmpty) {
         name = "Life account-${DateTime.now().second}";

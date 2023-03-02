@@ -13,6 +13,7 @@ import 'package:uvid/ui/screens/schedule_calendar_screen.dart';
 import 'package:uvid/ui/screens/video_call_screen.dart';
 import 'package:uvid/ui/widgets/loading.dart';
 import 'package:uvid/utils/connectivity.dart';
+import 'package:uvid/utils/notifications.dart';
 import 'package:uvid/utils/routes.dart';
 import 'package:uvid/utils/state_managment/contact_manager.dart';
 import 'package:uvid/utils/state_managment/friend_manager.dart';
