@@ -6,9 +6,11 @@ import 'package:provider/provider.dart';
 import 'package:uvid/common/extensions.dart';
 import 'package:uvid/domain/models/friend_model.dart';
 import 'package:uvid/domain/models/profile.dart';
+import 'package:uvid/ui/pages/home_page.dart';
 import 'package:uvid/ui/widgets/bouncing_widget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:uvid/ui/widgets/gap.dart';
+import 'package:uvid/utils/notifications.dart';
 import 'package:uvid/utils/state_managment/friend_manager.dart';
 
 import '../../utils/utils.dart';
@@ -20,20 +22,30 @@ class FriendScreen extends StatefulWidget {
   State<FriendScreen> createState() => _FriendScreenState();
 }
 
-class _FriendScreenState extends State<FriendScreen> {
-  late bool _isListenData;
+class _FriendScreenState extends State<FriendScreen> with TickerProviderStateMixin {
+  late AnimationController _scaleAnimationController;
+  late Animation<double> _scaleAnimation;
   @override
   void initState() {
     super.initState();
-    _isListenData = true;
+    _scaleAnimationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 1),
+      lowerBound: 0.3,
+      upperBound: 1,
+    );
+    _scaleAnimation = CurvedAnimation(parent: _scaleAnimationController, curve: Curves.fastOutSlowIn);
+    _scaleAnimationController.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _scaleAnimationController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isListenData) {
-      context.read<FriendManager>().listenFriend();
-      _isListenData = false;
-    }
     return Scaffold(
       backgroundColor: context.colorScheme.tertiary,
       appBar: AppBar(
@@ -75,7 +87,15 @@ class _FriendScreenState extends State<FriendScreen> {
       body: _buildBody(
         context,
         onPhoneCall: (profile) {
-          //!TODO make phone call
+          context.read<FriendManager>().callToFriend(
+            profile,
+            () {
+              _buildDialogPhoneCall(profile, context);
+            },
+            (meetingID) {
+              joinMeeting(context, meetingID, false);
+            },
+          );
         },
         onRemovedFriend: (profile) {
           context.read<FriendManager>().removeFriend(profile, () {
@@ -89,6 +109,81 @@ class _FriendScreenState extends State<FriendScreen> {
       ),
     );
   }
+
+  _buildDialogPhoneCall(Profile profile, BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        icon: Icon(Icons.phone_enabled_rounded),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        iconColor: context.colorScheme.onPrimary,
+        backgroundColor: context.colorScheme.primary,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              child: ClipRRect(
+                borderRadius: BorderRadius.all(Radius.circular(30)),
+                child: profile.photoUrl == null
+                    ? Image.asset(
+                        'assets/ic_launcher.png',
+                        fit: BoxFit.cover,
+                        width: 60,
+                        height: 60,
+                      )
+                    : profile.avatarUrlIsLink
+                        ? Image.network(
+                            profile.photoUrl!,
+                            fit: BoxFit.cover,
+                            width: 60,
+                            height: 60,
+                          )
+                        : Image.memory(
+                            base64Decode(profile.photoUrl!),
+                            fit: BoxFit.cover,
+                            width: 60,
+                            height: 60,
+                          ),
+              ),
+            ),
+            Text(
+              '${profile.name == null ? 'No name' : profile.name}',
+              style: context.textTheme.bodyText1?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Text(
+              '${profile.email == null ? profile.phoneNumber : profile.email}',
+              style: context.textTheme.bodyText1?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(
+              height: 12,
+            ),
+            ScaleTransition(
+              scale: _scaleAnimation,
+              child: FloatingActionButton(
+                heroTag: null,
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+                splashColor: getEndColorCute(3),
+                elevation: 12,
+                mini: true,
+                child: Icon(Icons.phone_disabled_rounded),
+                onPressed: () {
+                  context.read<FriendManager>().cancelCalling();
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 Widget _buildBody(
@@ -97,7 +192,6 @@ Widget _buildBody(
   required Function(Profile)? onRemovedFriend,
 }) {
   final List<Profile>? friends = context.watch<FriendManager>().friends;
-  print(friends);
   if (friends == null) {
     return Center(
       child: CircularProgressIndicator(),

@@ -73,7 +73,11 @@ class ContactScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: SearchResultsListView(
-                      contacts: context.watch<ContactManager>().contactsAvailable,
+                      contacts: context
+                          .watch<ContactManager>()
+                          .contactsAvailable
+                          .where((element) => context.read<ContactManager>().user.userId != element.userId)
+                          .toList(),
                       onAddFriendClickListener: (contactModel) {
                         context.read<ContactManager>().triggerHandleFriend(
                           contactModel,

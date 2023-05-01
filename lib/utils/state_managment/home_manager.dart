@@ -42,11 +42,8 @@ class HomeManager extends ChangeNotifier {
 
   Profile? profile = null;
   void setProfile(Profile? newProfile) {
-    LocalStorage().setProfile(newProfile);
-    if (profile == null) {
-      LocalStorage().setAccessToken(null);
-    }
     profile = newProfile;
+    LocalStorage().setProfile(profile);
     notifyListeners();
   }
 

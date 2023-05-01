@@ -68,5 +68,20 @@
     "friend": "Bạn bè",
     "unavailable_get_frined": "Chưa sẵn sàng lấy danh sách bạn bè",
     "room_id_must_not_empty": "Mã phòng không được để trống",
-    "copied": "Đã sao chép"
+    "copied": "Đã sao chép",
+    "create_new_even": "Tạo một sự kiện",
+    "event_title": "Tiêu đề sự kiện",
+    "start_date": "Ngày bắt đầu",
+    "end_date": "Ngày kết thúc",
+    "time_start": "Thời gian bắt đầu",
+    "time_end": "Thời gian kết thúc",
+    "event_description": "Nội dung sự kiện",
+    "please_enter_event_title": "Vui lòng nhập tiêu đề sự kiện",
+    "please_select_date": "Vui lòng chọn ngày cho sự kiện",
+    "please_select_start_time": "Vui lòng giờ bắt đầu",
+    "please_select_end_time": "Vui lòng chọn giờ kết thúc",
+    "please_enter_event_description": "Vui lòng nhập nội dung sự kiện",
+    "event_color": "Màu sự kiện",
+    "add_event": "Thêm sự kiện",
+    "select": "Chọn"
 }

@@ -7,9 +7,13 @@ import 'package:uvid/utils/notifications.dart';
 import 'ui/app.dart';
 
 void main() async {
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
   // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive, overlays: [SystemUiOverlay.bottom]);
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.immersive,
+    overlays: [SystemUiOverlay.bottom],
+  );
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

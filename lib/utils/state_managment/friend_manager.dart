@@ -5,10 +5,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:uvid/common/constants.dart';
+import 'package:uvid/common/extensions.dart';
 import 'package:uvid/data/local_storage.dart';
+import 'package:uvid/domain/models/contact_model.dart';
 import 'package:uvid/domain/models/profile.dart';
-
-enum StateData { ADDED, DELETED }
+import 'package:uvid/utils/notifications.dart';
 
 class FriendManager extends ChangeNotifier {
   FriendManager._() {
@@ -21,52 +22,66 @@ class FriendManager extends ChangeNotifier {
 
   final _ref = FirebaseDatabase.instance.ref();
   final collectionUser = FirebaseFirestore.instance.collection(USER_COLLECTION);
-  final StreamController<Map<String, StateData>> friendUniqueIdsController = StreamController.broadcast();
   final List<String> friendUniqueIds = [];
   List<Profile>? friends = null;
+  List<ContactModel> waittingsCalling = [];
   Profile? _user = null;
+  get user => _user;
   void _loadInitData() async {
     _user = await LocalStorage().getProfile();
     _fetchFriends();
   }
 
   void _fetchFriends() async {
-    if (_user == null) return;
-    final cachedFriendIds = await LocalStorage().getCachedFriendIds();
-    if (cachedFriendIds.isNotEmpty) {
-      cachedFriendIds.forEach((element) {
-        friendUniqueIdsController.add({element: StateData.ADDED});
-      });
+    if (_user == null) {
+      friends = [];
+      notifyListeners();
+      return;
     }
-    _ref.child(FRIEND_COLLECTION).child(_user!.uniqueId!).onChildAdded.listen((DatabaseEvent event) {
-      if (event.snapshot.exists) {
-        if (!cachedFriendIds.contains(event.snapshot.key)) {
-          friendUniqueIdsController.sink.add({event.snapshot.key!: StateData.ADDED});
-        }
-      }
-    });
-  }
-
-  listenFriend() {
-    friendUniqueIdsController.stream.listen((event) async {
-      if (event.entries.first.value == StateData.ADDED) {
-        friendUniqueIds.add(event.entries.first.key);
-        LocalStorage().updateCachedFriendIds(event.entries.first.key);
-        final doc = await collectionUser.doc(event.entries.first.key).get();
+    final cachedFriendIds = await LocalStorage().getCachedFriendIds();
+    if (friends == null) friends = [];
+    if (cachedFriendIds.isNotEmpty) {
+      cachedFriendIds.forEach((element) async {
+        final doc = await collectionUser.doc(element).get();
         if (doc.exists) {
           if (doc.data() != null) {
-            if (friends == null) friends = [];
             friends!.add(Profile.fromMap(doc.data()!));
             notifyListeners();
           }
         }
-      } else {
-        friendUniqueIds.remove(event.entries.first.key);
-        LocalStorage().updateCachedFriendIds(event.entries.first.key, isRemoved: true);
-        if (friends != null && friends!.isNotEmpty && _user != null) {
-          friends!.removeAt(friends!.indexWhere((element) => element.uniqueId == event.entries.first.key));
-          await _ref.child(_user!.uniqueId!).child(event.entries.first.key).remove();
-          notifyListeners();
+      });
+    } else {
+      friends = [];
+      notifyListeners();
+    }
+    _ref.child(FRIEND_COLLECTION).child(_user!.uniqueId!).onChildAdded.listen((DatabaseEvent event) async {
+      if (event.snapshot.exists) {
+        if (!cachedFriendIds.contains(event.snapshot.key)) {
+          final key = event.snapshot.key ?? '';
+          friendUniqueIds.add(key);
+          LocalStorage().updateCachedFriendIds(key);
+          final doc = await collectionUser.doc(key).get();
+          if (doc.exists) {
+            if (doc.data() != null) {
+              if (friends == null) friends = [];
+              friends!.add(Profile.fromMap(doc.data()!));
+              notifyListeners();
+            }
+          }
+        }
+      }
+    });
+    _ref.child(FRIEND_COLLECTION).child(_user!.uniqueId!).onChildRemoved.listen((DatabaseEvent event) async {
+      if (event.snapshot.exists) {
+        if (!cachedFriendIds.contains(event.snapshot.key)) {
+          final key = event.snapshot.key ?? '';
+          friendUniqueIds.remove(key);
+          LocalStorage().updateCachedFriendIds(key, isRemoved: true);
+          if (friends != null && friends!.isNotEmpty && _user != null) {
+            friends!.removeAt(friends!.indexWhere((element) => element.uniqueId == key));
+            await _ref.child(FRIEND_COLLECTION).child(key).child(_user!.uniqueId!).remove();
+            notifyListeners();
+          }
         }
       }
     });
@@ -113,6 +128,186 @@ class FriendManager extends ChangeNotifier {
   @override
   void dispose() {
     super.dispose();
-    friendUniqueIdsController.close();
+    //friendUniqueIdsController.close();
+  }
+
+  Profile? _profileTrackCall = null;
+  void trackCall({
+    Function(Profile)? onCalling = null,
+    Function()? onCallingCancelled = null,
+    Function(String meetingId)? onAcceptCalling = null,
+  }) {
+    LocalStorage().getProfile().then((userCached) {
+      if (_user == null && userCached != null) {
+        _user = userCached;
+      }
+      if (userCached?.uniqueId == null) return;
+      _ref.child(SENDER_CALL_COLLECTION).child(userCached!.uniqueId!).once().then((DatabaseEvent event) {
+        final snapshot = event.snapshot;
+        if (snapshot.exists) {
+          if (snapshot.value is String) {
+            try {
+              final profile = Profile.fromJson(snapshot.value as String);
+              _profileTrackCall = profile;
+              onCalling?.call(profile);
+            } on FormatException catch (e) {}
+          }
+        }
+      });
+
+      _ref.child(SENDER_CALL_COLLECTION).onChildRemoved.listen((DatabaseEvent event) {
+        final snapshot = event.snapshot;
+        if (snapshot.exists) {
+          if (snapshot.key == userCached.uniqueId!) {
+            onCallingCancelled?.call();
+          }
+        }
+      });
+
+      LocalStorage().getPartnerId().then((partnerId) {
+        _ref.child(MEETING_COOLECTION).onChildAdded.listen((event) {
+          final snapshot = event.snapshot;
+          if (snapshot.key == partnerId + user.uniqueId && partnerId.isNotEmpty) {
+            onAcceptCalling?.call(partnerId + user.uniqueId);
+            LocalStorage().setPartnerIdCalling('');
+          }
+        });
+      });
+    });
+  }
+
+  bool _isCalling = false;
+  callToFriend(
+    Profile profile,
+    VoidCallback onCallSuccessfully,
+    Function(String meetingId) onAcceptCalling,
+  ) {
+    if (_isCalling || _user?.uniqueId == null) return;
+    _isCalling = true;
+    final partnerId = profile.uniqueId!;
+    LocalStorage().setPartnerIdCalling(partnerId);
+    _ref.child(SENDER_CALL_COLLECTION).child(_user!.uniqueId!).set(profile.toJson()).then((value) {
+      _ref.child(WAITING_ACCEPT_CALL_COLLECTION).child(partnerId).child(_user!.uniqueId!).set(_user!.toContactModel().toJson());
+      _ref.child(MEETING_COOLECTION).child(partnerId + user.uniqueId).remove().then((value) {
+        _ref.child(MEETING_COOLECTION).onChildAdded.listen((event) async {
+          final snapshot = event.snapshot;
+          final partnerIdCached = await LocalStorage().getPartnerId();
+          if (snapshot.key == partnerId + user.uniqueId && partnerIdCached.isEmpty) {
+            LocalStorage().setPartnerIdCalling('');
+            onAcceptCalling.call(partnerId + user.uniqueId);
+          }
+        });
+      });
+      _profileTrackCall = profile;
+      _isCalling = false;
+      onCallSuccessfully.call();
+    }).onError((error, stackTrace) {
+      _isCalling = false;
+    });
+  }
+
+  bool _isCancellingCall = false;
+  cancelCalling() {
+    if (_isCancellingCall || _user?.uniqueId == null) return;
+    _isCancellingCall = true;
+    _ref.child(SENDER_CALL_COLLECTION).child(_user!.uniqueId!).remove().then((value) {
+      if (_profileTrackCall != null) {
+        _ref.child(WAITING_ACCEPT_CALL_COLLECTION).child(_profileTrackCall!.uniqueId!).child(_user!.uniqueId!).remove();
+        _isCancellingCall = false;
+      }
+    }).onError((error, stackTrace) {
+      _isCancellingCall = false;
+    });
+  }
+
+  bool _isRemovingCall = false;
+  removingCall(String keyId, VoidCallback onComplete) {
+    if (_isRemovingCall || _user?.uniqueId == null) return;
+    _isRemovingCall = true;
+    _ref.child(SENDER_CALL_COLLECTION).child(keyId).remove().then((value) {
+      _ref.child(WAITING_ACCEPT_CALL_COLLECTION).child(_user!.uniqueId!).child(keyId).remove().then((value) {
+        _isRemovingCall = false;
+        waittingsCalling.removeWhere((element) => element.keyId == keyId);
+        if (waittingsCalling.isEmpty) onComplete.call();
+        notifyListeners();
+      });
+    }).onError((error, stackTrace) {
+      _isRemovingCall = false;
+    });
+  }
+
+  bool _isAcceptCalling = false;
+  acceptCalling(String keyId, Function(String meetingId) joinMeeting) {
+    if (_isAcceptCalling || _user?.uniqueId == null) return;
+    _isAcceptCalling = true;
+    _ref.child(SENDER_CALL_COLLECTION).child(keyId).remove().then((value) {
+      _ref.child(WAITING_ACCEPT_CALL_COLLECTION).child(_user!.uniqueId!).remove().then((value) {
+        _ref.child(MEETING_COOLECTION).child(_user!.uniqueId! + keyId).set(getTimeNowInWholeMilliseconds());
+        _isAcceptCalling = false;
+        waittingsCalling.clear();
+        if (waittingsCalling.isEmpty) joinMeeting.call(_user!.uniqueId! + keyId);
+        notifyListeners();
+      });
+    }).onError((error, stackTrace) {
+      _isAcceptCalling = false;
+    });
+  }
+
+  bool isHavingCallingCalled = false;
+  void trackOnReceivedCalling(VoidCallback onHaveCalling, VoidCallback onCompleteTracking) {
+    LocalStorage().getProfile().then((userCached) {
+      if (_user == null && userCached != null) {
+        _user = userCached;
+      }
+      if (waittingsCalling.isNotEmpty) waittingsCalling.clear;
+
+      _ref.child(WAITING_ACCEPT_CALL_COLLECTION).child(_user!.uniqueId!).onChildAdded.listen((event) {
+        final snapshot = event.snapshot;
+        if (snapshot.exists) {
+          if (snapshot.value is String) {
+            try {
+              if (!isHavingCallingCalled) {
+                isHavingCallingCalled = true;
+                onHaveCalling.call();
+              }
+              final contactModel = ContactModel.fromJson(snapshot.value as String);
+              if (!waittingsCalling.contains(contactModel)) {
+                waittingsCalling.add(contactModel);
+              }
+              NotificationManager().showBasicNotification(
+                title: "Life notification",
+                body: "You have people calling",
+              );
+              notifyListeners();
+            } on FormatException catch (e) {}
+          }
+        }
+      });
+
+      _ref.child(WAITING_ACCEPT_CALL_COLLECTION).child(_user!.uniqueId!).onChildRemoved.listen((event) {
+        final snapshot = event.snapshot;
+        if (snapshot.exists) {
+          if (snapshot.value is String) {
+            try {
+              final contactModel = ContactModel.fromJson(snapshot.value as String);
+              if (waittingsCalling.contains(contactModel)) {
+                waittingsCalling.remove(contactModel);
+              }
+              notifyListeners();
+            } on FormatException catch (e) {}
+          }
+        }
+      });
+
+      _ref.child(WAITING_ACCEPT_CALL_COLLECTION).onChildRemoved.listen((DatabaseEvent event) {
+        final snapshot = event.snapshot;
+        if (snapshot.exists) {
+          if (snapshot.value is Map<Object?, Object?> && snapshot.key != null && snapshot.key == userCached!.uniqueId!) {
+            isHavingCallingCalled = false;
+            onCompleteTracking.call();
+          }
+        }
+      });
+    });
   }
 }

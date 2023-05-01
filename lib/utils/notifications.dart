@@ -67,10 +67,11 @@ class NotificationManager {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Allow Notifications'),
+        backgroundColor: context.colorScheme.primary,
         content: Text(
           'Our app would like to send you notifications',
           style: context.textTheme.bodyText1?.copyWith(
-            color: Colors.white,
+            color: context.colorScheme.onPrimary,
             fontSize: 16,
           ),
         ),
@@ -82,7 +83,7 @@ class NotificationManager {
             child: Text(
               'Don\'t Allow',
               style: TextStyle(
-                color: Colors.grey,
+                color: Colors.grey.shade700,
                 fontSize: 18,
               ),
             ),
@@ -92,7 +93,7 @@ class NotificationManager {
               child: Text(
                 'Allow',
                 style: TextStyle(
-                  color: Colors.teal,
+                  color: context.colorScheme.onPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -125,6 +126,7 @@ class NotificationManager {
   Future<void> showScheduledNotification({
     String title = '${Emojis.office_calendar + Emojis.office_calendar + Emojis.person_activity_man_dancing}',
     String body = 'You have a schedule video conference!!!',
+    date: DateTime,
   }) async {
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
@@ -147,10 +149,8 @@ class NotificationManager {
       ],
       schedule: NotificationCalendar.fromDate(
         allowWhileIdle: true,
-        repeats: true,
-        date: millisecondsToDateTime(
-          DateTime.now().millisecondsSinceEpoch + 1000,
-        ),
+        repeats: false,
+        date: date,
       ),
     );
   }

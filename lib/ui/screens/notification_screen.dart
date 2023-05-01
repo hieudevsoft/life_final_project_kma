@@ -8,6 +8,7 @@ import 'package:uvid/domain/models/friend_model.dart';
 import 'package:uvid/ui/widgets/bouncing_widget.dart';
 import 'package:uvid/ui/widgets/gap.dart';
 import 'package:uvid/ui/widgets/painter/custom_shape_painter.dart';
+import 'package:uvid/utils/state_managment/friend_manager.dart';
 import 'package:uvid/utils/state_managment/home_manager.dart';
 import 'package:uvid/utils/state_managment/notification_manager.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -45,49 +46,43 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => NotificationManager(),
-      lazy: false,
-      builder: (context, child) {
-        return Scaffold(
-          backgroundColor: context.colorScheme.tertiary,
-          appBar: AppBar(
-            elevation: 1,
-            title: Text(
-              AppLocalizations.of(context)!.notification,
-              style: context.textTheme.bodyText1?.copyWith(
-                color: context.colorScheme.onPrimary,
-                fontSize: 24,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: BouncingButton(
-                  child: Icon(Icons.change_circle_rounded),
-                  onClickListener: () {
-                    context.read<NotificationManager>().fetchWaittingFriendAccept();
-                  },
-                ),
-              )
-            ],
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(8),
-                bottomRight: Radius.circular(8),
-              ),
+    return Scaffold(
+        backgroundColor: context.colorScheme.tertiary,
+        appBar: AppBar(
+          elevation: 1,
+          title: Text(
+            AppLocalizations.of(context)!.notification,
+            style: context.textTheme.bodyText1?.copyWith(
+              color: context.colorScheme.onPrimary,
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
             ),
           ),
-          body: _buildBody(context, scrollController, _isScrollToTopVisible),
-        );
-      },
-    );
+          actions: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: BouncingButton(
+                child: Icon(Icons.restore_rounded),
+                onClickListener: () {
+                  context.read<NotificationManager>().fetchWaittingFriendAccept();
+                },
+              ),
+            ),
+          ],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(8),
+              bottomRight: Radius.circular(8),
+            ),
+          ),
+        ),
+        body: _buildBodyFriend(context, scrollController, _isScrollToTopVisible));
   }
 }
 
-Widget _buildBody(BuildContext context, ScrollController scrollController, bool isScrollToTopVisible) {
+Widget _buildBodyFriend(BuildContext context, ScrollController scrollController, bool isScrollToTopVisible) {
   final waittings = context.watch<NotificationManager>().waitingAccepts;
+
   if (waittings == null) {
     return Center(
       child: CircularProgressIndicator(),

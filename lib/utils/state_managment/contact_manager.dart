@@ -37,6 +37,7 @@ class ContactManager extends ChangeNotifier {
   }
 
   Profile? _user = null;
+  get user => _user;
   bool isGuessAccount = false;
   Future<bool> checkGuessAccount() async {
     final accessToken = await LocalStorage().getAccessToken();
@@ -51,6 +52,12 @@ class ContactManager extends ChangeNotifier {
   }
 
   List<ContactModel> contactsAvailable = [];
+
+  void resetContactsAvailable() {
+    contactsAvailable = [];
+    notifyListeners();
+  }
+
   bool isLoadingSearch = false;
   void search(String query) async {
     isLoadingSearch = true;
@@ -92,6 +99,7 @@ class ContactManager extends ChangeNotifier {
 
     if (snapshots.docs.isNotEmpty) {
       snapshots.docs.forEach((element) async {
+        print(element.data());
         if (element.exists) {
           final profile = Profile.fromMap(element.data());
           ContactModel contact = profile.toContactModel();
@@ -145,10 +153,11 @@ class ContactManager extends ChangeNotifier {
     } else {
       if (contactModel.keyId != null) {
         await _ref.child(WAITING_ACCEPT_FRIEND_COLLECTION).child(contactModel.keyId!).child(_user!.uniqueId.toString()).update({
-          'userId': contactModel.userId,
-          'name': contactModel.name,
-          'image': contactModel.urlLinkImage,
-          'description': contactModel.description,
+          'keyId': _user!.uniqueId!,
+          'userId': _user!.userId,
+          'name': _user!.name,
+          'image': _user!.photoUrl,
+          'description': _user!.email == null ? _user!.phoneNumber : _user!.email,
           'time': getTimeNowInWholeMilliseconds(),
         });
         onComplete?.call();

@@ -4,6 +4,7 @@ import 'package:jitsi_meet/feature_flag/feature_flag.dart';
 import 'package:jitsi_meet/jitsi_meet.dart';
 import 'package:path/path.dart';
 import 'package:platform_device_id/platform_device_id.dart';
+import 'package:uvid/common/constants.dart';
 import 'package:uvid/common/extensions.dart';
 import 'package:uvid/data/local_storage.dart';
 import 'package:uvid/domain/models/custom_jitsi_config_options.dart';
@@ -66,7 +67,7 @@ class JitsiMeetProviders {
             onConferenceJoined: (message) {
               debugPrint("${options.room} onConferenceJoined: $message");
               if (isOwnerRoom) {
-                _ref.child("meetings").child(customJitsiConfigOptions.room).child('owner').set({
+                _ref.child(MEETING_COOLECTION).child(customJitsiConfigOptions.room).child('owner').set({
                   "owner_id": _profile == null ? _deviceId : _profile!.uniqueId,
                   "owner_avatar": customJitsiConfigOptions.userAvatarURL,
                   "des": customJitsiConfigOptions.subject,
@@ -76,7 +77,7 @@ class JitsiMeetProviders {
                 });
               } else {
                 _ref
-                    .child("meetings")
+                    .child(MEETING_COOLECTION)
                     .child(customJitsiConfigOptions.room)
                     .child('members')
                     .child(_profile == null ? 'Life-guess-$_deviceId}' : _profile!.uniqueId!)
@@ -110,12 +111,12 @@ class JitsiMeetProviders {
 
   void updateExitRoom(bool isOwnerRoom, String room) {
     if (isOwnerRoom) {
-      _ref.child("meetings").child(room).child('owner').update({
+      _ref.child(MEETING_COOLECTION).child(room).child('owner').update({
         "exited_at": getTimeNowInWholeMilliseconds(),
       });
     } else {
       _ref
-          .child("meetings")
+          .child(MEETING_COOLECTION)
           .child(room)
           .child('members')
           .child(_profile == null ? 'Life-guess-$_deviceId}' : _profile!.uniqueId!)

@@ -14,6 +14,7 @@ import 'package:uvid/ui/widgets/gap.dart';
 import 'package:uvid/ui/widgets/popup_menu.dart';
 import 'package:uvid/utils/routes.dart';
 import 'package:uvid/utils/state_managment/home_manager.dart';
+import 'package:uvid/utils/state_managment/notification_manager.dart';
 import 'package:uvid/utils/state_managment/theme_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:uvid/utils/utils.dart';
@@ -135,6 +136,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                         if (profile != null) {
                           Utils().showToast(AppLocalizations.of(context)!.welcome, backgroundColor: Colors.green.shade200);
                           context.read<HomeManager>().setProfile(profile);
+                          context.read<NotificationManager>().fetchWaittingFriendAccept();
                           Navigator.pushReplacementNamed(context, AppRoutesDirect.home.route);
                         }
                       } else {
@@ -194,6 +196,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                         if (profile != null) {
                           Utils().showToast(AppLocalizations.of(context)!.welcome, backgroundColor: Colors.green.shade200);
                           context.read<HomeManager>().setProfile(profile);
+                          context.read<NotificationManager>().fetchWaittingFriendAccept();
                           Navigator.pushReplacementNamed(context, AppRoutesDirect.home.route);
                         }
                       } else {
@@ -287,6 +290,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   onPressed: () {
                     authProviders.signInWithLocalAuth(
                       onSuccessLocalAuth: () {
+                        context.read<NotificationManager>().fetchWaittingFriendAccept();
                         Navigator.pushReplacementNamed(context, AppRoutesDirect.home.route);
                       },
                       onHardwareNotSupportBiometrics: () {

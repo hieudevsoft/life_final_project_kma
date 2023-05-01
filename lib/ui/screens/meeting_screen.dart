@@ -11,10 +11,10 @@ import 'package:uvid/ui/widgets/page_animation/single_route_in_right_builder.dar
 import 'package:uvid/ui/widgets/page_animation/single_route_scale_builder.dart';
 import 'package:uvid/ui/widgets/page_animation/single_route_size_builder.dart';
 import 'package:uvid/ui/widgets/page_animation/two_route_slide_builder.dart';
-import 'package:uvid/utils/notifications.dart';
 import 'package:uvid/utils/routes.dart';
 import 'package:uvid/utils/state_managment/contact_manager.dart';
 import 'package:uvid/utils/state_managment/home_manager.dart';
+import 'package:uvid/utils/state_managment/notification_manager.dart';
 import 'package:uvid/utils/state_managment/theme_manager.dart';
 
 class MeetingScreen extends StatelessWidget {
@@ -24,6 +24,8 @@ class MeetingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isHasNotification = context.watch<NotificationManager>().waitingAccepts != null &&
+        context.watch<NotificationManager>().waitingAccepts!.isNotEmpty;
     return Column(
       children: [
         Wrap(
@@ -57,14 +59,13 @@ class MeetingScreen extends StatelessWidget {
             ),
             HomeMeetingButton(
               onPressed: () {
-                // Navigator.push(
-                //   context,
-                //   SingleRouteFadeBuilder(
-                //     mtAppKey: mtAppKey,
-                //     routeName: AppRoutesDirect.joinScreen.route,
-                //   ),
-                // );
-                NotificationManager().showScheduledNotification();
+                Navigator.push(
+                  context,
+                  SingleRouteFadeBuilder(
+                    mtAppKey: mtAppKey,
+                    routeName: AppRoutesDirect.joinScreen.route,
+                  ),
+                );
               },
               icon: Icons.add_box_rounded,
               iconColor: context.colorScheme.onPrimary,
@@ -85,6 +86,7 @@ class MeetingScreen extends StatelessWidget {
             HomeMeetingButton(
               onPressed: () {
                 Navigator.pushNamed(context, AppRoutesDirect.scheduleCalendar.route);
+                //NotificationManager().showScheduledNotification();
               },
               icon: Icons.calendar_month_rounded,
               iconColor: context.colorScheme.onPrimary,
@@ -147,8 +149,7 @@ class MeetingScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
               ),
-              isHasBaged:
-                  !context.read<HomeManager>().isMuteNotification && context.read<ContactManager>().contactsAvailable.isNotEmpty,
+              isHasBaged: !context.read<HomeManager>().isMuteNotification && isHasNotification,
             ),
           ],
         ),

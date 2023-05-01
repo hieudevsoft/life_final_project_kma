@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uvid/domain/models/audio_mode.dart';
 import 'package:uvid/domain/models/contact_mode.dart';
@@ -89,6 +88,7 @@ class LocalStorage {
   void setProfile(Profile? profile) async {
     if (profile == null) {
       await storage.delete(key: 'profile');
+      setAccessToken(null);
     } else {
       final value = profile.toJson();
       await storage.write(key: 'profile', value: value);
@@ -177,5 +177,18 @@ class LocalStorage {
       }
     }
     setCachedFriendIds(cachedFriendIds);
+  }
+
+  void setPartnerIdCalling(String partnerID) async {
+    if (partnerID.isEmpty) {
+      return;
+    }
+    await storage.write(key: "partner_id", value: partnerID);
+  }
+
+  Future<String> getPartnerId() async {
+    final partnerId = await storage.read(key: "partner_id");
+    if (partnerId == null) return "";
+    return partnerId;
   }
 }

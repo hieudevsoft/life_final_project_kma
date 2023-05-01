@@ -68,5 +68,20 @@
     "friend": "Friend",
     "unavailable_get_frined": "Unavailable get friends",
     "room_id_must_not_empty": "Room id must not empty",
-    "copied": "Copied"
+    "copied": "Copied",
+    "create_new_even": "Create New Event",
+    "event_title": "Event title",
+    "start_date": "Start date",
+    "end_date": "End date",
+    "time_start": "Start time",
+    "time_end": "End time",
+    "event_description": "Event description",
+    "please_enter_event_title": "Please enter event title",
+    "please_select_date": "Please select date",
+    "please_select_start_time": "Please select start time",
+    "please_select_end_time": "Please select end time",
+    "please_enter_event_description": "Please enter event description",
+    "event_color": "Event color",
+    "add_event": "Add event",
+    "select": "Select"
 }

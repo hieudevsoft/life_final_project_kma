@@ -24,6 +24,7 @@ import 'package:uvid/ui/widgets/gap.dart';
 import 'package:uvid/ui/widgets/popup_menu.dart';
 import 'package:uvid/ui/widgets/text_button.dart';
 import 'package:uvid/utils/routes.dart';
+import 'package:uvid/utils/state_managment/contact_manager.dart';
 import 'package:uvid/utils/state_managment/home_manager.dart';
 import 'package:uvid/utils/state_managment/theme_manager.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -51,6 +52,7 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
       AuthProviders().signOut();
       Utils().showToast(AppLocalizations.of(context)!.sign_out_successfully, backgroundColor: Colors.greenAccent.shade200);
       context.read<HomeManager>().setProfile(null);
+      context.read<ContactManager>().resetContactsAvailable();
       Future.delayed(
         Duration(milliseconds: 300),
         () {

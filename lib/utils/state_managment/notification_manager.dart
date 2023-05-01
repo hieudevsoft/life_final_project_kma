@@ -28,23 +28,28 @@ class NotificationManager extends ChangeNotifier {
       _user = await LocalStorage().getProfile();
     }
     if (_user != null) {
+      if (waitingAccepts == null) {
+        waitingAccepts = [];
+      } else {
+        waitingAccepts!.clear();
+      }
       _ref.child(WAITING_ACCEPT_FRIEND_COLLECTION).child(_user!.uniqueId!).once().then(
         (DatabaseEvent databaseEvent) {
           final snapshot = databaseEvent.snapshot;
           if (snapshot.exists) {
-            if (snapshot.children.length == 1) {
-              final data = snapshot.children.first.value;
-              if (data is Map<Object?, Object?>) {
-                try {
-                  final castMap = Map.castFrom<Object?, Object?, String, dynamic>(data);
-                  final friend = FriendModel.fromMap(castMap);
-                  if (waitingAccepts == null) {
-                    waitingAccepts = [];
+            if (snapshot.children.length > 0) {
+              snapshot.children.forEach((snapshot) {
+                if (snapshot.value is Map<Object?, Object?>) {
+                  try {
+                    final castMap = Map.castFrom<Object?, Object?, String, dynamic>(snapshot.value as Map<Object?, Object?>);
+                    final friend = FriendModel.fromMap(castMap);
+                    waitingAccepts!.add(friend);
+                    notifyListeners();
+                  } catch (e) {
+                    print(e);
                   }
-                  waitingAccepts!.add(friend);
-                  notifyListeners();
-                } catch (e) {}
-              }
+                }
+              });
             }
           }
           if (waitingAccepts == null) {
@@ -63,9 +68,14 @@ class NotificationManager extends ChangeNotifier {
     if (waitingAccepts == null || waitingAccepts!.isEmpty) return;
     final cachedContacts = await LocalStorage().getCachedContacts();
     final isExist = cachedContacts.indexWhere((element) => element.userId == userId) != -1;
-    if (isExist) {
-      final contact = cachedContacts.firstWhere((element) => element.userId == userId);
+    final isExistInWaittingAccepts =
+        waitingAccepts!.map((e) => e.toContactModel()).toList().indexWhere((element) => element.userId == userId) != -1;
+    if (isExist || isExistInWaittingAccepts) {
+      final contact = isExist
+          ? cachedContacts.firstWhere((element) => element.userId == userId)
+          : waitingAccepts!.map((e) => e.toContactModel()).toList().firstWhere((element) => element.userId == userId);
       await _ref.child(WAITING_ACCEPT_FRIEND_COLLECTION).child(_user!.uniqueId!).child(contact.keyId!).remove();
+      await _ref.child(WAITING_ACCEPT_FRIEND_COLLECTION).child(contact.keyId!).child(_user!.uniqueId!).remove();
       waitingAccepts!.removeWhere((element) => element.userId == userId);
       LocalStorage().updateContactLocal(contact.copyWith(friendStatus: 0));
       notifyListeners();
@@ -76,9 +86,17 @@ class NotificationManager extends ChangeNotifier {
     if (waitingAccepts == null || waitingAccepts!.isEmpty) return;
     final cachedContacts = await LocalStorage().getCachedContacts();
     final isExist = cachedContacts.indexWhere((element) => element.userId == userId) != -1;
-    if (isExist) {
-      final contact = cachedContacts.firstWhere((element) => element.userId == userId);
+    final isExistInWaittingAccepts =
+        waitingAccepts!.map((e) => e.toContactModel()).toList().indexWhere((element) => element.userId == userId) != -1;
+    if (isExist || isExistInWaittingAccepts) {
+      final contact = isExist
+          ? cachedContacts.firstWhere((element) => element.userId == userId)
+          : waitingAccepts!.map((e) => e.toContactModel()).toList().firstWhere((element) => element.userId == userId);
+
       await _ref.child(FRIEND_COLLECTION).child(_user!.uniqueId!).child(contact.keyId!).set({
+        'time': getTimeNowInWholeMilliseconds(),
+      });
+      await _ref.child(FRIEND_COLLECTION).child(contact.keyId!).child(_user!.uniqueId!).set({
         'time': getTimeNowInWholeMilliseconds(),
       });
       await _ref.child(WAITING_ACCEPT_FRIEND_COLLECTION).child(_user!.uniqueId!).child(contact.keyId!).remove();
