@@ -6,17 +6,17 @@ import 'package:equatable/equatable.dart';
 import 'package:uvid/domain/models/contact_model.dart';
 
 class Profile extends Equatable {
-  final String? name;
+  final String? uniqueId;
+  final String? userId;
   final String? email;
+  final String? phoneNumber;
+  final String? name;
+  final String? photoUrl;
+  final String? locale;
+  final String? providerId;
   final bool? isVerified;
   final DateTime? createdAt;
   final DateTime? lastSignInTime;
-  final String? phoneNumber;
-  final String? photoUrl;
-  final String? providerId;
-  final String? userId;
-  final String? uniqueId;
-  final String? locale;
 
   const Profile({
     this.name,

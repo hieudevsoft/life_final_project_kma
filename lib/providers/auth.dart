@@ -14,6 +14,7 @@ import 'package:uvid/domain/models/profile.dart';
 import 'package:uvid/exceptions/cancel_sign_in.dart';
 import 'package:uvid/exceptions/google_sign_in.dart';
 import 'package:uvid/exceptions/sign_out.dart';
+import 'package:uvid/utils/notifications.dart';
 
 class AuthProviders {
   AuthProviders._();
@@ -29,7 +30,7 @@ class AuthProviders {
   Stream<User?> get authStateChange => _firebaseAuth.authStateChanges();
   User? get currentUserFirebase => _firebaseAuth.currentUser;
 
-  Future<bool> signInWithGoogleSuccessfully() async {
+  Future<bool> signInWithGoogle() async {
     final Completer<bool> completer = Completer();
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -87,7 +88,6 @@ class AuthProviders {
     final Completer<bool> completer = Completer();
     try {
       final LoginResult result = await FacebookAuth.instance.login();
-
       if (result.status == LoginStatus.success) {
         final AccessToken? accessToken = result.accessToken;
         if (accessToken != null) {
@@ -144,24 +144,25 @@ class AuthProviders {
   }) async {
     try {
       await _firebaseAuth.verifyPhoneNumber(
-          phoneNumber: phoneNumber,
-          verificationCompleted: (PhoneAuthCredential credential) {
-            print('verificationCompleted $credential');
-          },
-          verificationFailed: (FirebaseAuthException e) {
-            if (onException != null) {
-              onException(e);
-            }
-          },
-          codeSent: (String verificationId, int? resendToken) {
-            onCodeSent(verificationId);
-          },
-          codeAutoRetrievalTimeout: (String verificationId) {
-            if (onAutoRetrievalTimeout != null) {
-              onAutoRetrievalTimeout(verificationId);
-            }
-          },
-          timeout: const Duration(seconds: 60));
+        phoneNumber: phoneNumber,
+        verificationCompleted: (PhoneAuthCredential credential) {
+          print('verificationCompleted $credential');
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          if (onException != null) {
+            onException(e);
+          }
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          onCodeSent(verificationId);
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          if (onAutoRetrievalTimeout != null) {
+            onAutoRetrievalTimeout(verificationId);
+          }
+        },
+        timeout: const Duration(seconds: 60),
+      );
     } catch (e) {
       if (onException != null) {
         onException(e);
@@ -282,6 +283,7 @@ class AuthProviders {
       await FacebookAuth.instance.logOut();
       LocalStorage().setProfile(null);
       LocalStorage().setAccessToken(null);
+      NotificationManager().cancelAllScheduledNotification();
     } catch (e) {
       throw SignOutException(msg: e);
     }

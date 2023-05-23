@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uvid/common/extensions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:uvid/data/local_storage.dart';
+import 'package:uvid/domain/models/audio_mode.dart';
 import 'package:uvid/domain/models/contact_model.dart';
 import 'package:uvid/domain/models/custom_jitsi_config_options.dart';
 import 'package:uvid/domain/models/profile.dart';
+import 'package:uvid/domain/models/video_mode.dart';
 import 'package:uvid/providers/jitsimeet.dart';
 import 'package:uvid/ui/app.dart';
 import 'package:uvid/ui/screens/contact_screen.dart';
@@ -404,8 +407,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
 isThereCurrentDialogShowing(BuildContext context) => ModalRoute.of(context)?.isCurrent != true;
 
-joinMeeting(BuildContext context, String meetingId, bool isOwner) {
-  final profile = context.read<HomeManager>().profile;
+joinMeeting(BuildContext context, String meetingId, bool isOwner) async {
+  final profile = await LocalStorage().getProfile();
+  final audioIsMute = await LocalStorage().getAudioMode() == AudioMode.OFF;
+  final videoIsMute = await LocalStorage().getVideoMode() == VideoMode.OFF;
   final userDisplayName = profile?.name == null
       ? profile?.phoneNumber == null
           ? ''
@@ -418,8 +423,8 @@ joinMeeting(BuildContext context, String meetingId, bool isOwner) {
 
   final CustomJitsiConfigOptions jitsiConfigOptions = CustomJitsiConfigOptions(
     room: meetingId,
-    audioMuted: context.read<HomeManager>().isMuteAudio,
-    videoMuted: context.read<HomeManager>().isMuteAudio,
+    audioMuted: audioIsMute,
+    videoMuted: videoIsMute,
     userDisplayName: userDisplayName,
     userAvatarURL: avatarProfile,
     userAuthencation: profile?.email ?? profile?.phoneNumber,

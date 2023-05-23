@@ -337,7 +337,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                 controller: controller,
                 maxLines: 1,
                 textAlign: TextAlign.center,
-                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   hintText: hint,

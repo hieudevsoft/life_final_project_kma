@@ -2,6 +2,7 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:uvid/common/extensions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:uvid/data/local_storage.dart';
 import 'package:uvid/domain/models/event.dart';
 import 'package:uvid/ui/pages/create_event_page.dart';
 
@@ -17,6 +18,11 @@ class _ScheduleCalendarScreenState extends State<ScheduleCalendarScreen> {
 
   @override
   void initState() {
+    LocalStorage().getProfile().then((value) => LocalStorage().getEvents(value?.uniqueId).then((value) {
+          value.forEach((element) {
+            CalendarControllerProvider.of<Event?>(context).controller.add(element.toCalendarEventData());
+          });
+        }));
     super.initState();
     mode = 0;
   }

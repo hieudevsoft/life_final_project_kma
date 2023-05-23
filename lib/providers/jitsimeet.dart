@@ -52,6 +52,7 @@ class JitsiMeetProviders {
         ..userDisplayName = name
         ..userEmail = userAuthencation
         ..userAvatarURL = customJitsiConfigOptions.userAvatarURL
+        ..serverURL = serverUrl
         ..videoMuted = customJitsiConfigOptions.videoMuted
         ..audioMuted = customJitsiConfigOptions.audioMuted
         ..audioOnly = customJitsiConfigOptions.audioOnly;
@@ -62,48 +63,50 @@ class JitsiMeetProviders {
         options.token = customJitsiConfigOptions.serverURL!;
       }
       currentTime = getTimeNowInWholeMilliseconds();
-      await JitsiMeet.joinMeeting(options,
-          listener: JitsiMeetingListener(
-            onConferenceJoined: (message) {
-              debugPrint("${options.room} onConferenceJoined: $message");
-              if (isOwnerRoom) {
-                _ref.child(MEETING_COOLECTION).child(customJitsiConfigOptions.room).child('owner').set({
-                  "owner_id": _profile == null ? _deviceId : _profile!.uniqueId,
-                  "owner_avatar": customJitsiConfigOptions.userAvatarURL,
-                  "des": customJitsiConfigOptions.subject,
-                  "name": customJitsiConfigOptions.userDisplayName,
-                  "created_at": currentTime,
-                  "exited_at": 0,
-                });
-              } else {
-                _ref
-                    .child(MEETING_COOLECTION)
-                    .child(customJitsiConfigOptions.room)
-                    .child('members')
-                    .child(_profile == null ? 'Life-guess-$_deviceId}' : _profile!.uniqueId!)
-                    .set({
-                  "avatar": customJitsiConfigOptions.userAvatarURL,
-                  "created_at": currentTime,
-                  "name": customJitsiConfigOptions.userDisplayName,
-                  "exited_at": 0,
-                });
-              }
-            },
-            onPictureInPictureTerminated: (message) {
-              debugPrint("${options.room} onPictureInPictureTerminated: $message");
-              updateExitRoom(isOwnerRoom, customJitsiConfigOptions.room);
-            },
-            onConferenceTerminated: (message) {
-              debugPrint("${options.room} onConferenceTerminated: $message");
-              updateExitRoom(isOwnerRoom, customJitsiConfigOptions.room);
-            },
-            onConferenceWillJoin: (message) {
-              debugPrint("${options.room} onConferenceWillJoin: $message");
-            },
-            onPictureInPictureWillEnter: (message) {
-              debugPrint("${options.room} onPictureInPictureWillEnter: $message");
-            },
-          ));
+      await JitsiMeet.joinMeeting(
+        options,
+        listener: JitsiMeetingListener(
+          onConferenceJoined: (message) {
+            debugPrint("${options.room} onConferenceJoined: $message");
+            if (isOwnerRoom) {
+              _ref.child(MEETING_COOLECTION).child(customJitsiConfigOptions.room).child('owner').set({
+                "id": _profile == null ? _deviceId : _profile!.uniqueId,
+                "name": customJitsiConfigOptions.userDisplayName,
+                "avatar": customJitsiConfigOptions.userAvatarURL,
+                "description": customJitsiConfigOptions.subject,
+                "created_at": currentTime,
+                "exited_at": 0,
+              });
+            } else {
+              _ref
+                  .child(MEETING_COOLECTION)
+                  .child(customJitsiConfigOptions.room)
+                  .child('members')
+                  .child(_profile == null ? 'Life-guess-$_deviceId}' : _profile!.uniqueId!)
+                  .set({
+                "name": customJitsiConfigOptions.userDisplayName,
+                "avatar": customJitsiConfigOptions.userAvatarURL,
+                "joined_at": currentTime,
+                "exited_at": 0,
+              });
+            }
+          },
+          onPictureInPictureTerminated: (message) {
+            debugPrint("${options.room} onPictureInPictureTerminated: $message");
+            updateExitRoom(isOwnerRoom, customJitsiConfigOptions.room);
+          },
+          onConferenceTerminated: (message) {
+            debugPrint("${options.room} onConferenceTerminated: $message");
+            updateExitRoom(isOwnerRoom, customJitsiConfigOptions.room);
+          },
+          onConferenceWillJoin: (message) {
+            debugPrint("${options.room} onConferenceWillJoin: $message");
+          },
+          onPictureInPictureWillEnter: (message) {
+            debugPrint("${options.room} onPictureInPictureWillEnter: $message");
+          },
+        ),
+      );
     } catch (error) {
       onError.call();
     }

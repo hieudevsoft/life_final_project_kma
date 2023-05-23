@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:uvid/common/constants.dart';
 import 'package:uvid/common/extensions.dart';
+import 'package:uvid/data/local_storage.dart';
+import 'package:uvid/domain/models/calendar_event_data_model.dart';
 import 'package:uvid/domain/models/event.dart';
 import 'package:uvid/ui/widgets/custom_button.dart';
 import 'package:uvid/ui/widgets/date_time_selector.dart';
 import 'package:uvid/utils/colors.dart';
 import 'package:uvid/utils/notifications.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:uvid/utils/utils.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddEventWidget extends StatefulWidget {
@@ -250,7 +254,7 @@ class _AddEventWidgetState extends State<AddEventWidget> {
     );
   }
 
-  void _createEvent() {
+  void _createEvent() async {
     if (!(_form.currentState?.validate() ?? true)) return;
 
     _form.currentState?.save();
@@ -267,6 +271,36 @@ class _AddEventWidgetState extends State<AddEventWidget> {
         title: _title,
       ),
     );
+    final eventModel = CalendarEventDataModel<Event>(
+      date: _startDate,
+      color: _color,
+      endTime: _endTime,
+      startTime: _startTime,
+      description: _description,
+      endDate: _endDate,
+      title: _title,
+      event: Event(
+        title: _title,
+      ),
+    );
+    if (_startTime!.isBefore(DateTime.now())) {
+      Utils().showToast(
+        AppLocalizations.of(context)!.now_time_must_be_before_start_time,
+        backgroundColor: Colors.redAccent,
+        textColor: Colors.white,
+      );
+      return;
+    }
+    if (_endTime!.isBefore(_startTime!)) {
+      Utils().showToast(
+        AppLocalizations.of(context)!.end_time_must_be_before_start_time,
+        backgroundColor: Colors.redAccent,
+        textColor: Colors.white,
+      );
+      return;
+    }
+    final uniqueId = (await LocalStorage().getProfile())?.uniqueId;
+    LocalStorage().updateEvent(uniqueId, eventModel);
     NotificationManager().showScheduledNotification(
       date: _startDate.add(
         Duration(

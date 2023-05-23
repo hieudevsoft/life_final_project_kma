@@ -83,5 +83,7 @@
     "please_enter_event_description": "Please enter event description",
     "event_color": "Event color",
     "add_event": "Add event",
-    "select": "Select"
+    "select": "Select",
+    "end_time_must_be_before_start_time": "End time must be before start time",
+    "now_time_must_be_before_start_time": "Time now must be before start time"
 }

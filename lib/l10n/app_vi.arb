@@ -83,5 +83,7 @@
     "please_enter_event_description": "Vui lòng nhập nội dung sự kiện",
     "event_color": "Màu sự kiện",
     "add_event": "Thêm sự kiện",
-    "select": "Chọn"
+    "select": "Chọn",
+    "end_time_must_be_before_start_time": "Thời gian kết thúc phải trước thời gian bắt đầu",
+    "now_time_must_be_before_start_time": "Thời gian bắt đầu phải trước thời gian bắt đầu"
 }

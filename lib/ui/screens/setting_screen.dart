@@ -420,9 +420,9 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
               gapV4,
               Text(
                 "${AppLocalizations.of(context)!.account_creation_time}: " +
-                    DateFormat.yMEd(profile.locale ?? 'en').format(profile.createdAt!) +
+                    DateFormat.yMEd().format(profile.createdAt!) +
                     " " +
-                    DateFormat.Hms(profile.locale ?? 'en').format(profile.createdAt!),
+                    DateFormat.Hms().format(profile.createdAt!),
                 style: context.textTheme.subtitle1?.copyWith(
                   fontSize: 13,
                   color: context.colorScheme.onTertiary,
@@ -433,9 +433,9 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
               gapV4,
               Text(
                 "${AppLocalizations.of(context)!.last_login}: " +
-                    DateFormat.yMEd(profile.locale ?? 'en').format(profile.lastSignInTime!) +
+                    DateFormat.yMEd().format(profile.lastSignInTime!) +
                     " " +
-                    DateFormat.Hms(profile.locale ?? 'en').format(profile.lastSignInTime!),
+                    DateFormat.Hms().format(profile.lastSignInTime!),
                 style: context.textTheme.subtitle1?.copyWith(
                   fontSize: 13,
                   color: context.colorScheme.onTertiary,

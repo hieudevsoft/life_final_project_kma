@@ -9,6 +9,7 @@ const String WAITING_ACCEPT_FRIEND_COLLECTION = 'waiting_accept_friend';
 const String SENDER_CALL_COLLECTION = 'sender_call';
 const String WAITING_ACCEPT_CALL_COLLECTION = 'waiting_accept_call';
 const String APP_NAME = 'Life';
+const String serverUrl = "https://alpha.jitsi.net";
 final keyAes = encrypt.Key.fromBase64('Q1aOOcpDHh8Gn3oSCPP8ZTYOaB1HpwM8kLJfbK0cAVE=');
 final iv = encrypt.IV.fromBase64('ZsM/zT2AxQytn3KgxJPivw==');
 const mode = encrypt.AESMode.cbc;

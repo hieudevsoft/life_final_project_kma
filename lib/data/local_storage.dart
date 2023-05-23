@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uvid/domain/models/audio_mode.dart';
+import 'package:uvid/domain/models/calendar_event_data_model.dart';
 import 'package:uvid/domain/models/contact_mode.dart';
 import 'package:uvid/domain/models/contact_model.dart';
 import 'package:uvid/domain/models/language_type.dart';
@@ -190,5 +192,33 @@ class LocalStorage {
     final partnerId = await storage.read(key: "partner_id");
     if (partnerId == null) return "";
     return partnerId;
+  }
+
+  void setEvents(String? uniqueId, List<CalendarEventDataModel> events) async {
+    if (events.isEmpty) {
+      return;
+    }
+    await storage.write(key: "${uniqueId}_events", value: json.encode(events));
+  }
+
+  Future<List<CalendarEventDataModel>> getEvents(String? uniqueId) async {
+    final events = await storage.read(key: "${uniqueId}_events");
+    if (events == null) return [];
+    final List<CalendarEventDataModel> result =
+        (json.decode(events) as List<dynamic>).map((e) => CalendarEventDataModel.fromJson(e)).toList();
+    return result;
+  }
+
+  void updateEvent(String? uniqueId, CalendarEventDataModel calendarEventData) async {
+    final events = await getEvents(uniqueId);
+    final indexOfEvent = events
+        .indexWhere((element) => element.startTime == calendarEventData.startTime && calendarEventData.date == element.date);
+    if (indexOfEvent == -1) {
+      events.add(calendarEventData);
+    } else {
+      events[indexOfEvent] = calendarEventData;
+    }
+    print(events);
+    setEvents(uniqueId, events);
   }
 }

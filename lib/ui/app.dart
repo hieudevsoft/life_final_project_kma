@@ -13,13 +13,15 @@ import 'package:uvid/ui/pages/auth/login_page.dart';
 import 'package:uvid/ui/pages/home_page.dart';
 import 'package:uvid/ui/widgets/loading.dart';
 import 'package:uvid/utils/connectivity.dart';
+import 'package:uvid/utils/notifications.dart';
 import 'package:uvid/utils/routes.dart';
 import 'package:uvid/utils/state_managment/contact_manager.dart';
 import 'package:uvid/utils/state_managment/friend_manager.dart';
 import 'package:uvid/utils/state_managment/home_manager.dart';
-import 'package:uvid/utils/state_managment/notification_manager.dart';
+import 'package:uvid/utils/state_managment/notification_manager.dart' as ntm;
 import 'package:uvid/utils/state_managment/theme_manager.dart';
 import 'package:provider/provider.dart';
+import 'package:uvid/utils/notifications.dart' as ntf;
 
 final GlobalKey mtAppKey = GlobalKey();
 DateTime get _now => DateTime.now();
@@ -62,6 +64,22 @@ class _MyUvidAppState extends State<MyUvidApp> {
           if (user == null || profile == null) {
             currentPage = LoginPage();
           } else {
+            LocalStorage().getEvents(profile.uniqueId).then((value) {
+              value.forEach((element) {
+                if (element.startTime != null) {
+                  if (element.startTime!.isAfter(DateTime.now())) {
+                    ntf.NotificationManager().showScheduledNotification(
+                      date: element.startTime!.add(
+                        Duration(
+                          hours: element.startTime!.hour,
+                          minutes: element.startTime!.minute,
+                        ),
+                      ),
+                    );
+                  }
+                }
+              });
+            });
             currentPage = HomePage();
           }
           setState(() {});
@@ -105,7 +123,7 @@ class _MyUvidAppState extends State<MyUvidApp> {
             create: (context) => friendManager,
           ),
           ChangeNotifierProvider(
-            create: (context) => NotificationManager(),
+            create: (context) => ntm.NotificationManager(),
           ),
         ],
         builder: (context, child) {

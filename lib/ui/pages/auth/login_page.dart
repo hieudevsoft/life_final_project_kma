@@ -190,7 +190,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       setState(() {
                         _isSignInAvailable = false;
                       });
-                      final isSignInWithGoogleSucessfully = await authProviders.signInWithGoogleSuccessfully();
+                      final isSignInWithGoogleSucessfully = await authProviders.signInWithGoogle();
                       if (isSignInWithGoogleSucessfully) {
                         final profile = await LocalStorage().getProfile();
                         if (profile != null) {
