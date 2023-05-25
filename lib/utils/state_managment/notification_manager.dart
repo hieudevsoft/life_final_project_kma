@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:uvid/common/constants.dart';
@@ -21,26 +23,31 @@ class NotificationManager extends ChangeNotifier {
     fetchWaittingFriendAccept();
   }
 
+  bool _isLoadingFetch = false;
   fetchWaittingFriendAccept() async {
+    if (_isLoadingFetch) return;
+    _isLoadingFetch = true;
     if (_user == null) {
       _user = await LocalStorage().getProfile();
     }
     if (_user != null) {
-      if (waitingAccepts == null) {
-        waitingAccepts = [];
-      } else {
-        waitingAccepts!.clear();
-      }
       _ref.child(WAITING_ACCEPT_FRIEND_COLLECTION).child(_user!.uniqueId!).once().then(
         (DatabaseEvent databaseEvent) {
+          _isLoadingFetch = false;
           final snapshot = databaseEvent.snapshot;
           if (snapshot.exists) {
             if (snapshot.children.length > 0) {
+              if (waitingAccepts == null) {
+                waitingAccepts = [];
+              } else {
+                waitingAccepts!.clear();
+              }
               snapshot.children.forEach((snapshot) {
                 if (snapshot.value is Map<Object?, Object?>) {
                   try {
                     final castMap = Map.castFrom<Object?, Object?, String, dynamic>(snapshot.value as Map<Object?, Object?>);
                     final friend = FriendModel.fromMap(castMap);
+                    print(waitingAccepts?.length);
                     waitingAccepts!.add(friend);
                     notifyListeners();
                   } catch (e) {
@@ -57,6 +64,7 @@ class NotificationManager extends ChangeNotifier {
         },
       );
     } else {
+      _isLoadingFetch = false;
       waitingAccepts = [];
       notifyListeners();
     }

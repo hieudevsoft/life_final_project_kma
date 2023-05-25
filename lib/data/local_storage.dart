@@ -137,9 +137,6 @@ class LocalStorage {
 
   void setCachedContacts(List<ContactModel> contacts) async {
     final uniqueId = (await getProfile())?.uniqueId;
-    if (contacts.isEmpty) {
-      return;
-    }
     await storage.write(key: "${uniqueId}_cached_contacts", value: json.encode(contacts));
   }
 
@@ -164,9 +161,6 @@ class LocalStorage {
 
   void setCachedFriendIds(List<String> contacts) async {
     final uniqueId = (await getProfile())?.uniqueId;
-    if (contacts.isEmpty) {
-      return;
-    }
     await storage.write(key: "{$uniqueId}_cached_friend_ids", value: json.encode(contacts));
   }
 
@@ -199,9 +193,6 @@ class LocalStorage {
   }
 
   void setEvents(String? uniqueId, List<CalendarEventDataModel> events) async {
-    if (events.isEmpty) {
-      return;
-    }
     await storage.write(key: "${uniqueId}_events", value: json.encode(events));
   }
 
@@ -222,7 +213,6 @@ class LocalStorage {
     } else {
       events[indexOfEvent] = calendarEventData;
     }
-    print(events);
     setEvents(uniqueId, events);
   }
 }

@@ -37,7 +37,11 @@ class FriendManager extends ChangeNotifier {
       return;
     }
     final cachedFriendIds = await LocalStorage().getCachedFriendIds();
-    if (friends == null) friends = [];
+    if (friends == null) {
+      friends = [];
+    } else {
+      friends!.clear();
+    }
     if (cachedFriendIds.isNotEmpty) {
       cachedFriendIds.forEach((element) async {
         final doc = await collectionUser.doc(element).get();
@@ -88,7 +92,7 @@ class FriendManager extends ChangeNotifier {
   void reloadFriend({
     VoidCallback? onUnAvailable = null,
   }) {
-    if (_user == null || friendUniqueIds.isEmpty) {
+    if (_user == null) {
       onUnAvailable?.call();
       return;
     }
@@ -120,13 +124,14 @@ class FriendManager extends ChangeNotifier {
       return;
     }
     friends!.removeWhere((element) => element.uniqueId == uniqueId);
+    friendUniqueIds.removeWhere((element) => element == uniqueId);
+    LocalStorage().updateCachedFriendIds(uniqueId, isRemoved: true);
     notifyListeners();
   }
 
   @override
   void dispose() {
     super.dispose();
-    //friendUniqueIdsController.close();
   }
 
   Profile? _profileTrackCall = null;

@@ -69,7 +69,8 @@ class AuthProviders {
           }
         }
         LocalStorage().setProfile(userProfile);
-        LocalStorage().setAccessToken(userCredential.credential?.accessToken);
+        final token = userCredential.credential?.accessToken ?? userCredential.credential?.token.toString();
+        LocalStorage().setAccessToken(token);
         completer.complete(true);
       } else {
         throw GoogleSignInException(msg: 'User is null');
@@ -122,7 +123,8 @@ class AuthProviders {
               }
             }
             LocalStorage().setProfile(userProfile);
-            LocalStorage().setAccessToken(userCredential.credential?.accessToken);
+            final token = userCredential.credential?.accessToken ?? userCredential.credential?.token.toString();
+            LocalStorage().setAccessToken(token);
             completer.complete(true);
           }
         }
@@ -210,7 +212,8 @@ class AuthProviders {
           }
         }
         LocalStorage().setProfile(userProfile);
-        LocalStorage().setAccessToken(userCredential.credential?.accessToken);
+        final token = userCredential.credential?.accessToken ?? userCredential.credential?.token.toString();
+        LocalStorage().setAccessToken(token);
         completer.complete(true);
       } else if (user != null && isJustVerify) {
         if (onPhoneCallback != null) {

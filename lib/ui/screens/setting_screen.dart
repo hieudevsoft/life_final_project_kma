@@ -333,7 +333,7 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
         ),
         gapV4,
         Text(
-          '${AppLocalizations.of(context)!.contacts}: ' + (profile.email ?? 'Hacker user'),
+          '${AppLocalizations.of(context)!.contacts}: ' + (profile.email ?? profile.phoneNumber ?? "Life-account"),
           style: context.textTheme.subtitle1?.copyWith(
             fontSize: 16,
             color: context.colorScheme.onSecondary.withOpacity(0.8),
@@ -387,37 +387,37 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    profile.isVerified == true ? Icons.check_rounded : Icons.close_rounded,
-                    color: profile.isVerified == true ? Colors.greenAccent.shade700 : context.colorScheme.error,
-                  ),
-                  gapH4,
-                  Text(
-                    profile.isVerified == true
-                        ? AppLocalizations.of(context)!.account_verified
-                        : AppLocalizations.of(context)!.account_unverified,
-                    style: context.textTheme.subtitle1?.copyWith(
-                      fontSize: 13,
-                      color: profile.isVerified == true ? Colors.greenAccent.shade700 : context.colorScheme.error,
-                      fontWeight: FontWeight.w900,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  Visibility(
-                    child: MyTextButton(
-                      child: Text(AppLocalizations.of(context)!.update),
-                      shape: StadiumBorder(),
-                    ),
-                    visible: profile.isVerified != true,
-                  )
-                ],
-              ),
-              gapV4,
+              // Row(
+              //   mainAxisSize: MainAxisSize.max,
+              //   crossAxisAlignment: CrossAxisAlignment.center,
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: [
+              //     Icon(
+              //       profile.isVerified == true ? Icons.check_rounded : Icons.close_rounded,
+              //       color: profile.isVerified == true ? Colors.greenAccent.shade700 : context.colorScheme.error,
+              //     ),
+              //     gapH4,
+              //     Text(
+              //       profile.isVerified == true
+              //           ? AppLocalizations.of(context)!.account_verified
+              //           : AppLocalizations.of(context)!.account_unverified,
+              //       style: context.textTheme.subtitle1?.copyWith(
+              //         fontSize: 13,
+              //         color: profile.isVerified == true ? Colors.greenAccent.shade700 : context.colorScheme.error,
+              //         fontWeight: FontWeight.w900,
+              //       ),
+              //       textAlign: TextAlign.center,
+              //     ),
+              //     Visibility(
+              //       child: MyTextButton(
+              //         child: Text(AppLocalizations.of(context)!.update),
+              //         shape: StadiumBorder(),
+              //       ),
+              //       visible: profile.isVerified != true,
+              //     )
+              //   ],
+              // ),
+              // gapV4,
               Text(
                 "${AppLocalizations.of(context)!.account_creation_time}: " +
                     DateFormat.yMEd().format(profile.createdAt!) +

@@ -13,6 +13,7 @@ import 'package:uvid/ui/widgets/elevated_button.dart';
 import 'package:uvid/ui/widgets/gap.dart';
 import 'package:uvid/ui/widgets/popup_menu.dart';
 import 'package:uvid/utils/routes.dart';
+import 'package:uvid/utils/state_managment/contact_manager.dart';
 import 'package:uvid/utils/state_managment/home_manager.dart';
 import 'package:uvid/utils/state_managment/notification_manager.dart';
 import 'package:uvid/utils/state_managment/theme_manager.dart';
@@ -41,7 +42,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   @override
   void dispose() {
     _controller.dispose();
-
     super.dispose();
   }
 
@@ -137,6 +137,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                           Utils().showToast(AppLocalizations.of(context)!.welcome, backgroundColor: Colors.green.shade200);
                           context.read<HomeManager>().setProfile(profile);
                           context.read<NotificationManager>().fetchWaittingFriendAccept();
+                          context.read<ContactManager>().loadInitData();
                           Navigator.pushReplacementNamed(context, AppRoutesDirect.home.route);
                         }
                       } else {
@@ -197,6 +198,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                           Utils().showToast(AppLocalizations.of(context)!.welcome, backgroundColor: Colors.green.shade200);
                           context.read<HomeManager>().setProfile(profile);
                           context.read<NotificationManager>().fetchWaittingFriendAccept();
+                          context.read<ContactManager>().loadInitData();
                           Navigator.pushReplacementNamed(context, AppRoutesDirect.home.route);
                         }
                       } else {

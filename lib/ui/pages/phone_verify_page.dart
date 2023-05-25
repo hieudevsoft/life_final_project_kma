@@ -15,6 +15,7 @@ import 'package:uvid/providers/firestore.dart';
 import 'package:uvid/ui/widgets/elevated_button.dart';
 import 'package:uvid/ui/widgets/gap.dart';
 import 'package:uvid/utils/routes.dart';
+import 'package:uvid/utils/state_managment/contact_manager.dart';
 import 'package:uvid/utils/state_managment/home_manager.dart';
 import 'package:uvid/utils/utils.dart';
 
@@ -323,6 +324,7 @@ class _PhoneVerifyPageState extends State<PhoneVerifyPage> {
                   LocalStorage().getProfile().then((value) {
                     if (value != null && PhoneVerifyPageType.REGISTER == Utils().phoneVerifyPageType) {
                       context.read<HomeManager>().setProfile(value);
+                      context.read<ContactManager>().loadInitData();
                       Navigator.pushNamedAndRemoveUntil(context, AppRoutesDirect.home.route, (route) {
                         return route.settings.name == "/home";
                       });

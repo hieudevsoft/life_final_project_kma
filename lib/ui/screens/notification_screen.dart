@@ -82,7 +82,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
 Widget _buildBodyFriend(BuildContext context, ScrollController scrollController, bool isScrollToTopVisible) {
   final waittings = context.watch<NotificationManager>().waitingAccepts;
-
   if (waittings == null) {
     return Center(
       child: CircularProgressIndicator(),
