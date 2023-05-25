@@ -12,9 +12,7 @@ import 'package:uvid/domain/models/profile.dart';
 import 'package:uvid/utils/notifications.dart';
 
 class FriendManager extends ChangeNotifier {
-  FriendManager._() {
-    _loadInitData();
-  }
+  FriendManager._();
   static get _instance => FriendManager._();
   factory FriendManager() {
     return _instance;
@@ -27,7 +25,7 @@ class FriendManager extends ChangeNotifier {
   List<ContactModel> waittingsCalling = [];
   Profile? _user = null;
   get user => _user;
-  void _loadInitData() async {
+  void loadInitData() async {
     _user = await LocalStorage().getProfile();
     _fetchFriends();
   }

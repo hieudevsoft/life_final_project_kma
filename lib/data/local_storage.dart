@@ -128,17 +128,19 @@ class LocalStorage {
   }
 
   Future<List<ContactModel>> getCachedContacts() async {
-    final contacts = await storage.read(key: "cached_contacts");
+    final uniqueId = (await getProfile())?.uniqueId;
+    final contacts = await storage.read(key: "${uniqueId}_cached_contacts");
     if (contacts == null) return [];
     final result = (json.decode(contacts) as List<dynamic>).map((e) => ContactModel.fromJson(e)).toList();
     return result;
   }
 
   void setCachedContacts(List<ContactModel> contacts) async {
+    final uniqueId = (await getProfile())?.uniqueId;
     if (contacts.isEmpty) {
       return;
     }
-    await storage.write(key: "cached_contacts", value: json.encode(contacts));
+    await storage.write(key: "${uniqueId}_cached_contacts", value: json.encode(contacts));
   }
 
   void updateContactLocal(ContactModel contactModel) async {
@@ -153,17 +155,19 @@ class LocalStorage {
   }
 
   Future<List<String>> getCachedFriendIds() async {
-    final contacts = await storage.read(key: "cached_friend_ids");
+    final uniqueId = (await getProfile())?.uniqueId;
+    final contacts = await storage.read(key: "{$uniqueId}_cached_friend_ids");
     if (contacts == null) return [];
     final result = (json.decode(contacts) as List<dynamic>).map((e) => e as String).toList();
     return result;
   }
 
   void setCachedFriendIds(List<String> contacts) async {
+    final uniqueId = (await getProfile())?.uniqueId;
     if (contacts.isEmpty) {
       return;
     }
-    await storage.write(key: "cached_friend_ids", value: json.encode(contacts));
+    await storage.write(key: "{$uniqueId}_cached_friend_ids", value: json.encode(contacts));
   }
 
   void updateCachedFriendIds(String uniqueId, {isRemoved = false}) async {

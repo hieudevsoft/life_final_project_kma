@@ -7,9 +7,7 @@ import 'package:uvid/domain/models/friend_model.dart';
 import 'package:uvid/domain/models/profile.dart';
 
 class NotificationManager extends ChangeNotifier {
-  NotificationManager._() {
-    _loadInitData();
-  }
+  NotificationManager._();
   static get _instance => NotificationManager._();
   factory NotificationManager() {
     return _instance;
@@ -19,7 +17,7 @@ class NotificationManager extends ChangeNotifier {
   Profile? _user = null;
   List<FriendModel>? waitingAccepts = null;
 
-  void _loadInitData() async {
+  void loadInitData() async {
     fetchWaittingFriendAccept();
   }
 
