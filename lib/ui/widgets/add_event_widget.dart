@@ -283,22 +283,25 @@ class _AddEventWidgetState extends State<AddEventWidget> {
         title: _title,
       ),
     );
-    if (_startTime!.isBefore(DateTime.now())) {
-      Utils().showToast(
-        AppLocalizations.of(context)!.now_time_must_be_before_start_time,
-        backgroundColor: Colors.redAccent,
-        textColor: Colors.white,
-      );
-      return;
+    if (_startDate.isAtSameMomentAs(_endDate)) {
+      if (_startTime!.isBefore(DateTime.now())) {
+        Utils().showToast(
+          AppLocalizations.of(context)!.now_time_must_be_before_start_time,
+          backgroundColor: Colors.redAccent,
+          textColor: Colors.white,
+        );
+        return;
+      }
+      if (_endTime!.isBefore(_startTime!)) {
+        Utils().showToast(
+          AppLocalizations.of(context)!.end_time_must_be_before_start_time,
+          backgroundColor: Colors.redAccent,
+          textColor: Colors.white,
+        );
+        return;
+      }
     }
-    if (_endTime!.isBefore(_startTime!)) {
-      Utils().showToast(
-        AppLocalizations.of(context)!.end_time_must_be_before_start_time,
-        backgroundColor: Colors.redAccent,
-        textColor: Colors.white,
-      );
-      return;
-    }
+
     final uniqueId = (await LocalStorage().getProfile())?.uniqueId;
     LocalStorage().updateEvent(uniqueId, eventModel);
     NotificationManager().showScheduledNotification(

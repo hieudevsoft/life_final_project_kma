@@ -28,6 +28,12 @@ class _ScheduleCalendarScreenState extends State<ScheduleCalendarScreen> {
   }
 
   @override
+  void dispose() {
+    CalendarControllerProvider.of<Event?>(context).controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(

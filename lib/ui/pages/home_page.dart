@@ -118,10 +118,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           context.read<HomeManager>().page == 0
               ? AppLocalizations.of(context)!.meet_and_chat_title
               : context.read<HomeManager>().page == 1
-                  ? AppLocalizations.of(context)!.meetings
-                  : context.read<HomeManager>().page == 2
-                      ? AppLocalizations.of(context)!.contacts
-                      : AppLocalizations.of(context)!.settings,
+                  ? AppLocalizations.of(context)!.contacts
+                  : AppLocalizations.of(context)!.settings,
           style: context.textTheme.bodyText1?.copyWith(
             color: context.colorScheme.onTertiary,
             fontSize: 24,

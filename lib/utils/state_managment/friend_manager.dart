@@ -36,46 +36,46 @@ class FriendManager extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    final cachedFriendIds = await LocalStorage().getCachedFriendIds();
+    //final cachedFriendIds = await LocalStorage().getCachedFriendIds();
     if (friends == null) {
       friends = [];
     } else {
       friends!.clear();
     }
-    if (cachedFriendIds.isNotEmpty) {
-      cachedFriendIds.forEach((element) async {
-        final doc = await collectionUser.doc(element).get();
-        if (doc.exists) {
-          if (doc.data() != null) {
-            friends!.add(Profile.fromMap(doc.data()!));
-            notifyListeners();
-          }
-        }
-      });
-    } else {
-      friends = [];
-      notifyListeners();
-    }
+    // if (cachedFriendIds.isNotEmpty) {
+    //   cachedFriendIds.forEach((element) async {
+    //     final doc = await collectionUser.doc(element).get();
+    //     if (doc.exists) {
+    //       if (doc.data() != null) {
+    //         friends!.add(Profile.fromMap(doc.data()!));
+    //         notifyListeners();
+    //       }
+    //     }
+    //   });
+    // } else {
+    //   friends = [];
+    //   notifyListeners();
+    // }
     _ref.child(FRIEND_COLLECTION).child(_user!.uniqueId!).onChildAdded.listen((DatabaseEvent event) async {
       if (event.snapshot.exists) {
-        if (!cachedFriendIds.contains(event.snapshot.key)) {
-          final key = event.snapshot.key ?? '';
+        final key = event.snapshot.key ?? '';
+        if (!friendUniqueIds.contains(event.snapshot.key)) {
           friendUniqueIds.add(key);
           LocalStorage().updateCachedFriendIds(key);
-          final doc = await collectionUser.doc(key).get();
-          if (doc.exists) {
-            if (doc.data() != null) {
-              if (friends == null) friends = [];
-              friends!.add(Profile.fromMap(doc.data()!));
-              notifyListeners();
-            }
+        }
+        final doc = await collectionUser.doc(key).get();
+        if (doc.exists) {
+          if (doc.data() != null) {
+            if (friends == null) friends = [];
+            friends!.add(Profile.fromMap(doc.data()!));
+            notifyListeners();
           }
         }
       }
     });
     _ref.child(FRIEND_COLLECTION).child(_user!.uniqueId!).onChildRemoved.listen((DatabaseEvent event) async {
       if (event.snapshot.exists) {
-        if (!cachedFriendIds.contains(event.snapshot.key)) {
+        if (friendUniqueIds.contains(event.snapshot.key)) {
           final key = event.snapshot.key ?? '';
           friendUniqueIds.remove(key);
           LocalStorage().updateCachedFriendIds(key, isRemoved: true);

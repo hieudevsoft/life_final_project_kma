@@ -141,15 +141,15 @@ class NotificationManager {
           autoCancel: true,
           enabled: true,
           buttonType: ActionButtonType.Default,
-          icon: Emojis.smile_alien,
+          // icon: Emojis.smile_alien,
           showInCompactView: true,
           label: 'Join!!',
           key: 'join',
         )
       ],
       schedule: NotificationCalendar.fromDate(
-        allowWhileIdle: true,
-        repeats: false,
+        // allowWhileIdle: true,
+        // repeats: false,
         date: date,
       ),
     );

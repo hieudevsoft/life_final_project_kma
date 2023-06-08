@@ -39,6 +39,8 @@ class AuthProviders {
         idToken: authencation?.idToken,
         accessToken: authencation?.accessToken,
       );
+      print(credential.idToken);
+      print(credential.accessToken);
       UserCredential? userCredential = await _firebaseAuth.signInWithCredential(credential);
       User? user = userCredential.user;
       if (user != null) {
